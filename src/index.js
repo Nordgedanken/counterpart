@@ -49,12 +49,14 @@ const isPlainObject = (val) => {
 
 const hasOwnProp = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
 
-export default class Counterpart {
+export default class Counterpart extends events.EventEmitter {
   constructor() {
+    super();
     this.onLocaleChange = this.addLocaleChangeListener;
     this.offLocaleChange = this.removeLocaleChangeListener;
     this.onTranslationNotFound = this.addTranslationNotFoundListener;
     this.offTranslationNotFound = this.removeTranslationNotFoundListener;
+    this._normalizeKeys = this._normalizeKeys.bind(this);
   }
 
   static isFunction(val) {
@@ -178,7 +180,7 @@ export default class Counterpart {
     var fallbackLocales = [].concat(options.fallbackLocale || _registry.fallbackLocales);
     delete options.fallbackLocale;
 
-    var keys = this._normalizeKeys(locale, scope, key, separator);
+    const keys = this._normalizeKeys(locale, scope, key, separator);
 
     var entry = getEntry(_registry.translations, keys);
 
@@ -268,7 +270,7 @@ export default class Counterpart {
     return result;
   };
 
-  static _normalizeKeys (locale, scope, key, separator) {
+  _normalizeKeys (locale, scope, key, separator) {
     var keys = [];
 
     keys = keys.concat(this._normalizeKey(locale, separator));
@@ -366,5 +368,3 @@ export default class Counterpart {
   };
 
 }
-
-extend(Counterpart.prototype, events.EventEmitter.prototype);
