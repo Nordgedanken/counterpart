@@ -10,69 +10,66 @@ import strftime from './strftime';
 
 var translationScope = 'counterpart';
 
-function isString(val) {
-  return typeof val === 'string' || Object.prototype.toString.call(val) === '[object String]';
-}
+let _registry = {
+  locale: 'en',
+  interpolate: true,
+  fallbackLocales: [],
+  scope: null,
+  translations: {},
+  interpolations: {},
+  normalizedKeys: {},
+  separator: '.',
+  keepTrailingDot: false,
+  keyTransformer: (key) => key
+};
 
-function isFunction(val) {
-  return typeof val === 'function' || Object.prototype.toString.call(val) === '[object Function]';
-}
+const isString = (val) => {
+  console.log(typeof val);
+  console.log(Object.prototype.toString.call(val));
+  return typeof val === 'string' || Object.prototype.toString.call(val) === '[object String]'
+};
 
-function isPlainObject(val) {
-  //Deal with older browsers (IE8) that don't return [object Null] in this case.
-  if (val === null) {
-    return false;
-  }
-  return Object.prototype.toString.call(val) === '[object Object]';
-}
+const isSymbol = (key) => isString(key) && key[0] === ':';
 
-function isSymbol(key) {
-  return isString(key) && key[0] === ':';
-}
+const getEntry = (translations, keys) =>  keys.reduce((result, key) => {
+                                            if (isPlainObject(result) && hasOwnProp(result, key)) {
+                                              return result[key];
+                                            } else {
+                                              return null;
+                                            }
+                                          }, translations);
 
-function hasOwnProp(obj, key) {
-  return Object.prototype.hasOwnProperty.call(obj, key);
-}
+const isPlainObject = (val) => {
+                        //Deal with older browsers (IE8) that don't return [object Null] in this case.
+                        if (val === null) {
+                          return false;
+                        }
+                        return Object.prototype.toString.call(val) === '[object Object]';
+                      };
 
-function getEntry(translations, keys) {
-  return keys.reduce(function(result, key) {
-    if (isPlainObject(result) && hasOwnProp(result, key)) {
-      return result[key];
-    } else {
-      return null;
-    }
-  }, translations);
-}
+const hasOwnProp = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
 
 export default class Counterpart {
   constructor() {
-    this._registry = {
-      locale: 'en',
-      interpolate: true,
-      fallbackLocales: [],
-      scope: null,
-      translations: {},
-      interpolations: {},
-      normalizedKeys: {},
-      separator: '.',
-      keepTrailingDot: false,
-      keyTransformer: (key) => key
-    };
-
     this.onLocaleChange = this.addLocaleChangeListener;
     this.offLocaleChange = this.removeLocaleChangeListener;
     this.onTranslationNotFound = this.addTranslationNotFoundListener;
     this.offTranslationNotFound = this.removeTranslationNotFoundListener;
   }
+
+  static isFunction(val) {
+    return typeof val === 'function' || Object.prototype.toString.call(val) === '[object Function]';
+  }
+
   static getLocale () {
-    return this._registry.locale;
+    return _registry.locale;
   };
 
   static setLocale (value) {
-    var previous = this._registry.locale;
+    var previous = _registry.locale;
 
     if (previous != value) {
-      this._registry.locale = value;
+      _registry.locale = value;
       this.emit('localechange', value, previous);
     }
 
@@ -80,64 +77,64 @@ export default class Counterpart {
   };
 
   static getFallbackLocale () {
-    return this._registry.fallbackLocales;
+    return _registry.fallbackLocales;
   };
 
   static setFallbackLocale (value) {
-    var previous = this._registry.fallbackLocales;
-    this._registry.fallbackLocales = [].concat(value || []);
+    var previous = _registry.fallbackLocales;
+    _registry.fallbackLocales = [].concat(value || []);
     return previous;
   };
 
   static getAvailableLocales () {
-    return this._registry.availableLocales || Object.keys(this._registry.translations);
+    return _registry.availableLocales || Object.keys(_registry.translations);
   };
 
   static setAvailableLocales (value) {
     var previous = this.getAvailableLocales();
-    this._registry.availableLocales = value;
+    _registry.availableLocales = value;
     return previous;
   };
 
   static getSeparator () {
-    return this._registry.separator;
+    return _registry.separator;
   };
 
   static setSeparator (value) {
-    var previous = this._registry.separator;
-    this._registry.separator = value;
+    var previous = _registry.separator;
+    _registry.separator = value;
     return previous;
   };
 
   static setInterpolate (value) {
-    var previous = this._registry.interpolate;
-    this._registry.interpolate = value;
+    var previous = _registry.interpolate;
+    _registry.interpolate = value;
     return previous;
   };
 
   static getInterpolate () {
-    return this._registry.interpolate;
+    return _registry.interpolate;
   };
 
   static setKeyTransformer (value) {
-    var previous = this._registry.keyTransformer;
-    this._registry.keyTransformer = value;
+    var previous = _registry.keyTransformer;
+    _registry.keyTransformer = value;
     return previous;
   };
 
   static getKeyTransformer () {
-    return this._registry.keyTransformer;
+    return _registry.keyTransformer;
   };
 
   static registerTranslations (locale, data) {
     var translations = {};
     translations[locale] = data;
-    extend(true, this._registry.translations, translations);
+    extend(true, _registry.translations, translations);
     return translations;
   };
 
   static registerInterpolations (data) {
-    return extend(true, this._registry.interpolations, data);
+    return extend(true, _registry.interpolations, data);
   };
 
   static addLocaleChangeListener (callback) {
@@ -165,25 +162,25 @@ export default class Counterpart {
       key = key.substr(1);
     }
 
-    key = this._registry.keyTransformer(key, options);
+    key = _registry.keyTransformer(key, options);
 
     options = extend(true, {}, options);
 
-    var locale = options.locale || this._registry.locale;
+    var locale = options.locale || _registry.locale;
     delete options.locale;
 
-    var scope = options.scope || this._registry.scope;
+    var scope = options.scope || _registry.scope;
     delete options.scope;
 
-    var separator = options.separator || this._registry.separator;
+    var separator = options.separator || _registry.separator;
     delete options.separator;
 
-    var fallbackLocales = [].concat(options.fallbackLocale || this._registry.fallbackLocales);
+    var fallbackLocales = [].concat(options.fallbackLocale || _registry.fallbackLocales);
     delete options.fallbackLocale;
 
     var keys = this._normalizeKeys(locale, scope, key, separator);
 
-    var entry = getEntry(this._registry.translations, keys);
+    var entry = getEntry(_registry.translations, keys);
 
     if (entry === null && options.fallback) {
       this.emit('translationnotfound', locale, key, options.fallback, scope);
@@ -194,7 +191,7 @@ export default class Counterpart {
       for (var ix in fallbackLocales) {
         var fallbackLocale = fallbackLocales[ix];
         var fallbackKeys = this._normalizeKeys(fallbackLocale, scope, key, separator);
-        entry = getEntry(this._registry.translations, fallbackKeys);
+        entry = getEntry(_registry.translations, fallbackKeys);
 
         if (entry) {
           locale = fallbackLocale;
@@ -209,7 +206,7 @@ export default class Counterpart {
 
     entry = this._pluralize(locale, entry, options.count);
 
-    if (this._registry.interpolate !== false && options.interpolate !== false) {
+    if (_registry.interpolate !== false && options.interpolate !== false) {
       entry = this._interpolate(entry, options);
     }
 
@@ -223,7 +220,7 @@ export default class Counterpart {
 
     options = extend(true, {}, options);
 
-    var locale  = options.locale  || this._registry.locale;
+    var locale  = options.locale  || _registry.locale;
     var scope   = options.scope   || translationScope;
     var type    = options.type    || 'datetime';
     var format  = options.format  || 'default';
@@ -249,18 +246,18 @@ export default class Counterpart {
   };
 
   static withLocale (locale, callback, context) {
-    var previous = this._registry.locale;
-    this._registry.locale = locale;
+    var previous = _registry.locale;
+    _registry.locale = locale;
     var result = callback.call(context);
-    this._registry.locale = previous;
+    _registry.locale = previous;
     return result;
   };
 
   static withScope (scope, callback, context) {
-    var previous = this._registry.scope;
-    this._registry.scope = scope;
+    var previous = _registry.scope;
+    _registry.scope = scope;
     var result = callback.call(context);
-    this._registry.scope = previous;
+    _registry.scope = previous;
     return result;
   };
 
@@ -282,9 +279,9 @@ export default class Counterpart {
   };
 
   static _normalizeKey (key, separator) {
-    this._registry.normalizedKeys[separator] = this._registry.normalizedKeys[separator] || {};
+    _registry.normalizedKeys[separator] = _registry.normalizedKeys[separator] || {};
 
-    this._registry.normalizedKeys[separator][key] = this._registry.normalizedKeys[separator][key] || (function(key) {
+    _registry.normalizedKeys[separator][key] = _registry.normalizedKeys[separator][key] || (function(key) {
       if (isArray(key)) {
         var normalizedKeyArray = key.map(function(k) { return this._normalizeKey(k, separator); }.bind(this));
 
@@ -300,7 +297,7 @@ export default class Counterpart {
           if (keys[i] === '') {
             keys.splice(i, 1);
 
-            if (this._registry.keepTrailingDot === true && i == keys.length) {
+            if (_registry.keepTrailingDot === true && i == keys.length) {
               keys[keys.length - 1] += '' + separator;
             }
           }
@@ -310,7 +307,7 @@ export default class Counterpart {
       }
     }.bind(this))(key);
 
-    return this._registry.normalizedKeys[separator][key];
+    return _registry.normalizedKeys[separator][key];
   };
 
   static _interpolate (entry, values) {
@@ -318,7 +315,7 @@ export default class Counterpart {
       return entry;
     }
 
-    return sprintf(entry, extend({}, this._registry.interpolations, values));
+    return sprintf(entry, extend({}, _registry.interpolations, values));
   };
 
   static _resolve (locale, scope, object, subject, options) {
