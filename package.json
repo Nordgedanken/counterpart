@@ -19,8 +19,8 @@
     "localize"
   ],
   "scripts": {
-    "start": "babel -s inline -d lib -w src --source-maps",
-    "build": "babel -s inline -d lib src  --source-maps",
+    "start": "babel -s inline -d lib -w src",
+    "build": "babel -s inline -d lib src",
     "prepublish": "npm run build"
   },
   "author": {

@@ -56,7 +56,7 @@ export default class Counterpart {
       normalizedKeys: {},
       separator: '.',
       keepTrailingDot: false,
-      keyTransformer: function(key) { return key; }
+      keyTransformer: (key) => key
     };
 
     this.onLocaleChange = this.addLocaleChangeListener;
@@ -64,11 +64,11 @@ export default class Counterpart {
     this.onTranslationNotFound = this.addTranslationNotFoundListener;
     this.offTranslationNotFound = this.removeTranslationNotFoundListener;
   }
-  getLocale () {
+  static getLocale () {
     return this._registry.locale;
   };
 
-  setLocale (value) {
+  static setLocale (value) {
     var previous = this._registry.locale;
 
     if (previous != value) {
@@ -79,84 +79,84 @@ export default class Counterpart {
     return previous;
   };
 
-  getFallbackLocale () {
+  static getFallbackLocale () {
     return this._registry.fallbackLocales;
   };
 
-  setFallbackLocale (value) {
+  static setFallbackLocale (value) {
     var previous = this._registry.fallbackLocales;
     this._registry.fallbackLocales = [].concat(value || []);
     return previous;
   };
 
-  getAvailableLocales () {
+  static getAvailableLocales () {
     return this._registry.availableLocales || Object.keys(this._registry.translations);
   };
 
-  setAvailableLocales (value) {
+  static setAvailableLocales (value) {
     var previous = this.getAvailableLocales();
     this._registry.availableLocales = value;
     return previous;
   };
 
-  getSeparator () {
+  static getSeparator () {
     return this._registry.separator;
   };
 
-  setSeparator (value) {
+  static setSeparator (value) {
     var previous = this._registry.separator;
     this._registry.separator = value;
     return previous;
   };
 
-  setInterpolate (value) {
+  static setInterpolate (value) {
     var previous = this._registry.interpolate;
     this._registry.interpolate = value;
     return previous;
   };
 
-  getInterpolate () {
+  static getInterpolate () {
     return this._registry.interpolate;
   };
 
-  setKeyTransformer (value) {
+  static setKeyTransformer (value) {
     var previous = this._registry.keyTransformer;
     this._registry.keyTransformer = value;
     return previous;
   };
 
-  getKeyTransformer () {
+  static getKeyTransformer () {
     return this._registry.keyTransformer;
   };
 
-  registerTranslations (locale, data) {
+  static registerTranslations (locale, data) {
     var translations = {};
     translations[locale] = data;
     extend(true, this._registry.translations, translations);
     return translations;
   };
 
-  registerInterpolations (data) {
+  static registerInterpolations (data) {
     return extend(true, this._registry.interpolations, data);
   };
 
-  addLocaleChangeListener (callback) {
+  static addLocaleChangeListener (callback) {
     this.addListener('localechange', callback);
   };
 
-  removeLocaleChangeListener (callback) {
+  static removeLocaleChangeListener (callback) {
     this.removeListener('localechange', callback);
   };
 
-  addTranslationNotFoundListener (callback) {
+  static addTranslationNotFoundListener (callback) {
     this.addListener('translationnotfound', callback);
   };
 
-  removeTranslationNotFoundListener (callback) {
+  static removeTranslationNotFoundListener (callback) {
     this.removeListener('translationnotfound', callback);
   };
 
-  translate (key, options) {
+  static translate (key, options) {
     if (!isArray(key) && !isString(key) || !key.length) {
       throw new Error('invalid argument: key');
     }
@@ -216,7 +216,7 @@ export default class Counterpart {
     return entry;
   };
 
-  localize (object, options) {
+  static localize (object, options) {
     if (!isDate(object)) {
       throw new Error('invalid argument: object must be a date');
     }
@@ -234,7 +234,7 @@ export default class Counterpart {
     return strftime(object, format, this.translate('names', options));
   };
 
-  _pluralize (locale, entry, count) {
+  static _pluralize (locale, entry, count) {
     if (typeof entry !== 'object' || entry === null || typeof count !== 'number') {
       return entry;
     }
@@ -248,7 +248,7 @@ export default class Counterpart {
     return pluralizeFunc(entry, count);
   };
 
-  withLocale (locale, callback, context) {
+  static withLocale (locale, callback, context) {
     var previous = this._registry.locale;
     this._registry.locale = locale;
     var result = callback.call(context);
@@ -256,7 +256,7 @@ export default class Counterpart {
     return result;
   };
 
-  withScope (scope, callback, context) {
+  static withScope (scope, callback, context) {
     var previous = this._registry.scope;
     this._registry.scope = scope;
     var result = callback.call(context);
@@ -264,14 +264,14 @@ export default class Counterpart {
     return result;
   };
 
-  withSeparator (separator, callback, context) {
+  static withSeparator (separator, callback, context) {
     var previous = this.setSeparator(separator);
     var result = callback.call(context);
     this.setSeparator(previous);
     return result;
   };
 
-  _normalizeKeys (locale, scope, key, separator) {
+  static _normalizeKeys (locale, scope, key, separator) {
     var keys = [];
 
     keys = keys.concat(this._normalizeKey(locale, separator));
@@ -281,7 +281,7 @@ export default class Counterpart {
     return keys;
   };
 
-  _normalizeKey (key, separator) {
+  static _normalizeKey (key, separator) {
     this._registry.normalizedKeys[separator] = this._registry.normalizedKeys[separator] || {};
 
     this._registry.normalizedKeys[separator][key] = this._registry.normalizedKeys[separator][key] || (function(key) {
@@ -313,7 +313,7 @@ export default class Counterpart {
     return this._registry.normalizedKeys[separator][key];
   };
 
-  _interpolate (entry, values) {
+  static _interpolate (entry, values) {
     if (typeof entry !== 'string') {
       return entry;
     }
@@ -321,7 +321,7 @@ export default class Counterpart {
     return sprintf(entry, extend({}, this._registry.interpolations, values));
   };
 
-  _resolve (locale, scope, object, subject, options) {
+  static _resolve (locale, scope, object, subject, options) {
     options = options || {};
 
     if (options.resolve === false) {
@@ -350,7 +350,7 @@ export default class Counterpart {
     return /^missing translation:/.test(result) ? null : result;
   };
 
-  _fallback (locale, scope, object, subject, options) {
+  static _fallback (locale, scope, object, subject, options) {
     options = except(options, 'fallback');
 
     if (isArray(subject)) {
