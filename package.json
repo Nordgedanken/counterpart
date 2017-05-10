@@ -19,8 +19,6 @@
     "localize"
   ],
   "scripts": {
-    "test": "make test",
-    "lint": "make lint",
     "start": "babel -s inline -d lib -w src --source-maps",
     "build": "babel -s inline -d lib src  --source-maps",
     "prepublish": "npm run build"
