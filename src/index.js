@@ -340,33 +340,33 @@ class Counterpart {
 
 extend(Counterpart.prototype, events.EventEmitter.prototype);
 
-Counterpart.prototype.onLocaleChange =
-Counterpart.prototype.addLocaleChangeListener = function(callback) {
-  this.addListener('localechange', callback);
-};
-
-Counterpart.prototype.offLocaleChange =
-Counterpart.prototype.removeLocaleChangeListener = function(callback) {
-  this.removeListener('localechange', callback);
-};
-
-Counterpart.prototype.onTranslationNotFound =
-Counterpart.prototype.addTranslationNotFoundListener = function(callback) {
-  this.addListener('translationnotfound', callback);
-};
-
-Counterpart.prototype.offTranslationNotFound =
-Counterpart.prototype.removeTranslationNotFoundListener = function(callback) {
-  this.removeListener('translationnotfound', callback);
-};
-
 const instance = new Counterpart();
 
-function translate(key){ return instance.translate(key); };
+Counterpart.prototype.onLocaleChange =
+Counterpart.prototype.addLocaleChangeListener = (callback) => {
+                                                  instance.addListener('localechange', callback);
+                                                };
 
-function registerTranslations(locale, data) {
-  return instance.registerTranslations(locale, data);
-};
+Counterpart.prototype.offLocaleChange =
+Counterpart.prototype.removeLocaleChangeListener = (callback) => {
+                                                      instance.removeListener('localechange', callback);
+                                                    };
+
+Counterpart.prototype.onTranslationNotFound =
+Counterpart.prototype.addTranslationNotFoundListener = (callback) => {
+                                                          instance.addListener('translationnotfound', callback);
+                                                        };
+
+Counterpart.prototype.offTranslationNotFound =
+Counterpart.prototype.removeTranslationNotFoundListener = (callback) => {
+                                                            instance.removeListener('translationnotfound', callback);
+                                                          };
+
+Counterpart.prototype.registerTranslations = (locale, data) => {
+                                                return instance.registerTranslations(locale, data);
+                                              };
+
+function translate(key) { return instance.translate(key); };
 
 extend(translate, instance, {
   Instance: Counterpart,
@@ -374,4 +374,3 @@ extend(translate, instance, {
 });
 
 export default translate;
-export {translate, registerTranslations};
