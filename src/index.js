@@ -127,7 +127,7 @@ class Counterpart {
     return extend(true, this._registry.interpolations, data);
   }
 
-  translate(key, options) {
+  translateIntern(key, options) {
     if (!isArray(key) && !isString(key) || !key.length) {
       throw new Error('invalid argument: key');
     }
@@ -200,9 +200,9 @@ class Counterpart {
     let format  = options.format  || 'default';
 
     options = { locale, scope, interpolate: false };
-    format  = this.translate(['formats', type, format], extend(true, {}, options));
+    format  = this.translateIntern(['formats', type, format], extend(true, {}, options));
 
-    return strftime(object, format, this.translate('names', options));
+    return strftime(object, format, this.translateIntern('names', options));
   }
 
   _pluralize(locale, entry, count) {
@@ -210,7 +210,7 @@ class Counterpart {
       return entry;
     }
 
-    const pluralizeFunc = this.translate('pluralize', { locale, scope: translationScope });
+    const pluralizeFunc = this.translateIntern('pluralize', { locale, scope: translationScope });
 
     if (Object.prototype.toString.call(pluralizeFunc) !== '[object Function]') {
       return pluralizeFunc;
@@ -300,7 +300,7 @@ class Counterpart {
     let result;
 
     if (isSymbol(subject)) {
-      result = this.translate(subject, extend({}, options, { locale, scope }));
+      result = this.translateIntern(subject, extend({}, options, { locale, scope }));
     } else if (isFunction(subject)) {
       let dateOrTime;
 
@@ -366,7 +366,7 @@ Counterpart.prototype.registerTranslations = (locale, data) => {
                                                 return instance.registerTranslations(locale, data);
                                               };
 
-function translate(key) { return instance.translate(key); };
+function translate(key) { return instance.translateIntern(key); };
 
 extend(translate, instance, {
   Instance: Counterpart,
