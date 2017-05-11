@@ -362,8 +362,11 @@ Counterpart.prototype.removeTranslationNotFoundListener = function(callback) {
 
 const instance = new Counterpart();
 
-const translate = (key) => instance.translate(key);
-const registerTranslations = (locale, data) => instance.registerTranslations(locale, data);
+function translate(key){ return instance.translate(key); };
+
+function registerTranslations(locale, data) {
+  return instance.registerTranslations(locale, data);
+};
 
 extend(translate, instance, {
   Instance: Counterpart,
