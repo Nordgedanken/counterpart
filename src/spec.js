@@ -1,6 +1,6 @@
 import assert from 'assert';
 import time from 'time';
-import translate from './';
+import translate from './index';
 const Translator = translate.Translator;
 
 describe('translate', () => {

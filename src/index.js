@@ -4,7 +4,7 @@ import {isDate} from 'util';
 import {sprintf} from "sprintf-js";
 import events from 'events';
 import except from 'except';
-import strftime from './strftime';
+import strftime from '../strftime';
 
 const translationScope = 'counterpart';
 
