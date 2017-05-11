@@ -361,19 +361,14 @@ Counterpart.prototype.offTranslationNotFound =
 Counterpart.prototype.removeTranslationNotFoundListener = (callback) => {
                                                             instance.removeListener('translationnotfound', callback);
                                                           };
-const Counterpart_var = {
-  registerTranslations: function(locale, data) {
-                                                  return instance.registerTranslationsIntern(locale, data);
-                                                },
+const registerTranslations = (locale, data) => instance.registerTranslationsIntern(locale, data);
 
-  translate: function(key) { return instance.translateIntern(key); }
-};
+const translate = (key) => instance.translateIntern(key);
 
-extend(Counterpart_var.translate, instance, {
+extend(translate, instance, {
   Instance: Counterpart,
   Translator: Counterpart
 });
 
-export default Counterpart_var
-const translate_var = Counterpart_var.translate;
-export {translate_var}
+export default instance
+export {translate, registerTranslations}
