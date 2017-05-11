@@ -370,5 +370,6 @@ extend(translate, instance, {
   Translator: Counterpart
 });
 
-export default instance
-export {translate, registerTranslations}
+export default translate
+const counterpart = new Counterpart;
+export {counterpart , translate, registerTranslations}
