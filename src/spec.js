@@ -1,113 +1,113 @@
-var assert = require('assert');
-var time = require('time');
-var translate = require('./');
-var Translator = translate.Translator;
+import assert from 'assert';
+import time from 'time';
+import translate from './';
+const Translator = translate.Translator;
 
-describe('translate', function() {
-  var instance;
+describe('translate', () => {
+  let instance;
 
-  beforeEach(function() {
+  beforeEach(() => {
     instance = new Translator();
   });
 
-  it('is a function', function() {
+  it('is a function', () => {
     assert.isFunction(instance.translate);
   });
 
-  it('is backward-compatible', function() {
+  it('is backward-compatible', () => {
     assert.isFunction(translate);
     assert.isFunction(translate.translate);
   });
 
-  describe('when called', function() {
-    describe('with a non-empty string or an array as first argument', function() {
-      it('does not throw an invalid argument error', function() {
-        assert.doesNotThrow(function() { instance.translate('foo'); },   /invalid argument/);
-        assert.doesNotThrow(function() { instance.translate(['foo']); }, /invalid argument/);
+  describe('when called', () => {
+    describe('with a non-empty string or an array as first argument', () => {
+      it('does not throw an invalid argument error', () => {
+        assert.doesNotThrow(() => { instance.translate('foo'); },   /invalid argument/);
+        assert.doesNotThrow(() => { instance.translate(['foo']); }, /invalid argument/);
       });
 
-      describe('with the default locale present', function() {
-        describe('without a current scope or provided scope option', function() {
-          it('generates the correct normalized keys', function() {
+      describe('with the default locale present', () => {
+        describe('without a current scope or provided scope option', () => {
+          it('generates the correct normalized keys', () => {
             assert.equal(instance.translate('foo'), 'missing translation: en.foo');
           });
         });
 
-        describe('with a current scope present', function() {
-          it('generates the correct normalized keys', function() {
-            instance.withScope('other', function() {
+        describe('with a current scope present', () => {
+          it('generates the correct normalized keys', () => {
+            instance.withScope('other', () => {
               assert.equal(instance.translate('foo'), 'missing translation: en.other.foo');
             });
           });
         });
 
-        describe('with a scope provided as option', function() {
-          it('generates the correct normalized keys', function() {
+        describe('with a scope provided as option', () => {
+          it('generates the correct normalized keys', () => {
             assert.equal(instance.translate('foo', { scope: 'other' }), 'missing translation: en.other.foo');
           });
         });
       });
 
-      describe('with a different locale present', function() {
-        describe('without a current scope or provided scope option', function() {
-          it('generates the correct normalized keys', function() {
-            instance.withLocale('de', function() {
+      describe('with a different locale present', () => {
+        describe('without a current scope or provided scope option', () => {
+          it('generates the correct normalized keys', () => {
+            instance.withLocale('de', () => {
               assert.equal(instance.translate('foo'), 'missing translation: de.foo');
             });
           });
         });
 
-        describe('with a current scope present', function() {
-          it('generates the correct normalized keys', function() {
-            instance.withLocale('de', function() {
-              instance.withScope('other', function() {
+        describe('with a current scope present', () => {
+          it('generates the correct normalized keys', () => {
+            instance.withLocale('de', () => {
+              instance.withScope('other', () => {
                 assert.equal(instance.translate('foo'), 'missing translation: de.other.foo');
               });
             });
           });
         });
 
-        describe('with a scope provided as option', function() {
-          it('generates the correct normalized keys', function() {
-            instance.withLocale('de', function() {
+        describe('with a scope provided as option', () => {
+          it('generates the correct normalized keys', () => {
+            instance.withLocale('de', () => {
               assert.equal(instance.translate('foo', { scope: 'other' }), 'missing translation: de.other.foo');
             });
           });
         });
       });
 
-      describe('with a locale provided as option', function() {
-        describe('without a current scope or provided scope option', function() {
-          it('generates the correct normalized keys', function() {
+      describe('with a locale provided as option', () => {
+        describe('without a current scope or provided scope option', () => {
+          it('generates the correct normalized keys', () => {
             assert.equal(instance.translate('foo', { locale: 'de' }), 'missing translation: de.foo');
           });
         });
 
-        describe('with a current scope present', function() {
-          it('generates the correct normalized keys', function() {
-            instance.withScope('other', function() {
+        describe('with a current scope present', () => {
+          it('generates the correct normalized keys', () => {
+            instance.withScope('other', () => {
               assert.equal(instance.translate('foo', { locale: 'de' }), 'missing translation: de.other.foo');
             });
           });
         });
 
-        describe('with a scope provided as option', function() {
-          it('generates the correct normalized keys', function() {
+        describe('with a scope provided as option', () => {
+          it('generates the correct normalized keys', () => {
             assert.equal(instance.translate('foo', { locale: 'de', scope: 'other' }), 'missing translation: de.other.foo');
           });
         });
       });
 
-      describe('with options provided', function() {
-        it('does not mutate these options', function() {
-          var options = { locale: 'en', scope: ['foo1', 'foo2'], count: 3, bar: { baz: 'bum' } };
+      describe('with options provided', () => {
+        it('does not mutate these options', () => {
+          const options = { locale: 'en', scope: ['foo1', 'foo2'], count: 3, bar: { baz: 'bum' } };
           instance.translate('boing', options);
           assert.deepEqual(options, { locale: 'en', scope: ['foo1', 'foo2'], count: 3, bar: { baz: 'bum' } });
         });
       });
 
-      describe('with a translation for the key present', function() {
-        it('returns that translation', function() {
+      describe('with a translation for the key present', () => {
+        it('returns that translation', () => {
           instance.registerTranslations('en', { foo: { bar: { baz: { bam: 'boo' } } } });
 
           // strings
@@ -135,8 +135,8 @@ describe('translate', function() {
           assert.equal(instance.translate('bam...',                         { scope: [null, 'foo..bar', '', 'baz'] }), 'boo');
         });
 
-        describe('with a `count` provided as option', function() {
-          it('correctly pluralizes the translated value', function() {
+        describe('with a `count` provided as option', () => {
+          it('correctly pluralizes the translated value', () => {
             instance.registerTranslations('en', { foo: { zero: 'no items', one: 'one item', other: '%(count)s items' } });
 
             assert.equal(instance.translate('foo', { count: 0 }),   'no items');
@@ -146,8 +146,8 @@ describe('translate', function() {
           });
         });
 
-        describe('with a `separator` provided as option', function() {
-          it('correctly returns single array with key', function() {
+        describe('with a `separator` provided as option', () => {
+          it('correctly returns single array with key', () => {
             instance.registerTranslations('en', {
               'long.key.with.dots.in.name': 'Key with dots doesn\'t get split and returns correctly',
               another: {
@@ -166,16 +166,16 @@ describe('translate', function() {
             assert.equal(instance.translate('mixed-dots.and-separator', { separator: '-' }), 'bingo');
           });
 
-          it('correctly returns nested key when using `*` as seperator', function() {
+          it('correctly returns nested key when using `*` as seperator', () => {
             instance.registerTranslations('en', { "long": { key: { "with": { dots: { "in": { name: 'boo'  }  } } }}  });
 
             assert.equal(instance.translate('long*key*with*dots*in*name', { separator: '*' }), 'boo');
           });
         });
 
-        describe('with other options provided', function() {
-          describe('by default', function() {
-            it('interpolates these options into the translated value', function() {
+        describe('with other options provided', () => {
+          describe('by default', () => {
+            it('interpolates these options into the translated value', () => {
               instance.registerTranslations('en', { foo: 'Hi %(name)s! See you %(when)s!' });
               assert.equal(instance.translate('foo', { name: 'Paul', when: 'later', where: 'home' }), 'Hi Paul! See you later!');
 
@@ -183,8 +183,8 @@ describe('translate', function() {
               assert.equal(instance.translate('foo', { users: [{ name: 'Molly' }, { name: 'Polly' }] }), 'Hello Molly and Polly!');
             });
 
-            it('interpolates the registered interpolations into the translated value', function() {
-              var current = instance._registry.interpolations;
+            it('interpolates the registered interpolations into the translated value', () => {
+              const current = instance._registry.interpolations;
 
               instance.registerTranslations('en', {'hello':'Hello from %(brand)s!'});
               instance.registerInterpolations({brand:'Z'});
@@ -202,20 +202,20 @@ describe('translate', function() {
             });
           });
 
-          describe('with the `interpolate` options set to `false`', function() {
-            it('interpolates these options into the translated value', function() {
+          describe('with the `interpolate` options set to `false`', () => {
+            it('interpolates these options into the translated value', () => {
               instance.registerTranslations('en', { foo: 'Hi %(name)s! See you %(when)s!' });
               assert.equal(instance.translate('foo', { interpolate: false, name: 'Paul', when: 'later', where: 'home' }), 'Hi %(name)s! See you %(when)s!');
             });
           });
         });
 
-        describe('with the keepTrailingDot setting set to true', function() {
-          it('returns the translation for keys that contain a trailing dot', function() {
+        describe('with the keepTrailingDot setting set to true', () => {
+          it('returns the translation for keys that contain a trailing dot', () => {
             instance.registerTranslations('fr', { foo: { bar: 'baz', 'With a dot.': 'Avec un point.' }, 'dot.': 'point.' });
             instance._registry.keepTrailingDot = true;
 
-            instance.withLocale('fr', function() {
+            instance.withLocale('fr', () => {
               assert.equal(instance.translate('foo.bar'),  'baz');
               assert.equal(instance.translate('foo.With a dot.'),  'Avec un point.');
               assert.equal(instance.translate('dot.'),  'point.');
@@ -233,34 +233,34 @@ describe('translate', function() {
         });
       });
 
-      describe('with a translation for a prefix of the key present', function() {
-        it('returns the remaining translation part', function() {
+      describe('with a translation for a prefix of the key present', () => {
+        it('returns the remaining translation part', () => {
           instance.registerTranslations('en', { foo: { bar: { baz: { zero: 'no items', one: 'one item', other: '%(count)s items' } } } });
           assert.deepEqual(instance.translate('baz', { scope: ['foo', 'bar'] }), { zero: 'no items', one: 'one item', other: '%(count)s items' });
         });
       });
 
-      describe('with an array-type translation for the key present', function() {
-        it('returns the array that key points to', function() {
+      describe('with an array-type translation for the key present', () => {
+        it('returns the array that key points to', () => {
           instance.registerTranslations('en', { foo: { bar: { baz: [1, 'A', 0.42] } } });
           assert.deepEqual(instance.translate(['bar', 'baz'], { scope: 'foo' }), [1, 'A', 0.42]);
         });
       });
 
-      describe('with a function-type translation for the key present', function() {
-        it('returns the array that key points to', function() {
-          var myFunc = function() {};
+      describe('with a function-type translation for the key present', () => {
+        it('returns the array that key points to', () => {
+          const myFunc = () => {};
 
           instance.registerTranslations('en', { foo: { bar: { baz: myFunc } } });
           assert.equal(instance.translate(['bar', 'baz'], { scope: 'foo' }), myFunc);
         });
       });
 
-      describe('with a function-type fallback present', function() {
-        it('returns the array that key points to', function() {
-          var myFunc = function() { return 'Here I am!'; };
-          var myFunc2 = function(x) { return 'Here ' + x + ' are!'; };
-          var fallbacks = [':i_dont_exist_either', myFunc, 'Should not be returned'];
+      describe('with a function-type fallback present', () => {
+        it('returns the array that key points to', () => {
+          const myFunc = () => 'Here I am!';
+          const myFunc2 = x => `Here ${x} are!`;
+          const fallbacks = [':i_dont_exist_either', myFunc, 'Should not be returned'];
 
           assert.equal(instance.translate('i_dont_exist', { fallback: myFunc }), 'Here I am!');
           assert.equal(instance.translate('i_dont_exist', { fallback: myFunc2, object: 'you' }), 'Here you are!');
@@ -269,13 +269,13 @@ describe('translate', function() {
         });
       });
 
-      describe('without a translation for the key present', function() {
-        it('returns a string "missing translation: %(locale).%(scope).%(key)"', function() {
+      describe('without a translation for the key present', () => {
+        it('returns a string "missing translation: %(locale).%(scope).%(key)"', () => {
           assert.deepEqual(instance.translate('bar', { locale: 'unknown', scope: 'foo' }), 'missing translation: unknown.foo.bar');
         });
 
-        describe('with a `fallback` provided as option', function() {
-          it('returns the fallback', function() {
+        describe('with a `fallback` provided as option', () => {
+          it('returns the fallback', () => {
             assert.equal(instance.translate('baz', { locale: 'foo', scope: 'bar', fallback: 'boom' }), 'boom');
             assert.equal(instance.translate('baz', { locale: 'foo', scope: 'bar', fallback: 'Hello, %(name)s!', name: 'Martin' }), 'Hello, Martin!');
 
@@ -287,7 +287,7 @@ describe('translate', function() {
             assert.deepEqual(instance.translate('baz', { locale: 'foo', scope: 'bar', fallback: [1, 'A', 0.42] }), 1);
           });
 
-          it('translates the fallback if given as "symbol" or array', function() {
+          it('translates the fallback if given as "symbol" or array', () => {
             instance.registerTranslations('en', { foo: { bar: 'bar', baz: 'baz' } });
 
             assert.equal(instance.translate('missing', { fallback: 'default' }), 'default');
@@ -298,15 +298,15 @@ describe('translate', function() {
           });
         });
 
-        describe('with a global `fallbackLocale` present', function() {
-          it('returns the entry of the fallback locale', function() {
+        describe('with a global `fallbackLocale` present', () => {
+          it('returns the entry of the fallback locale', () => {
             instance.registerTranslations('de', { bar: { baz: 'bam' } });
             instance.registerTranslations('de', { hello: 'Hallo %(name)s!' });
 
             assert.equal(instance.translate('baz', { locale: 'foo', scope: 'bar' }), 'missing translation: foo.bar.baz');
             assert.equal(instance.translate('hello', { locale: 'foo', name: 'Martin' }), 'missing translation: foo.hello');
 
-            var previousFallbackLocale = instance.setFallbackLocale('de');
+            const previousFallbackLocale = instance.setFallbackLocale('de');
 
             assert.equal(instance.translate('baz', { locale: 'foo', scope: 'bar' }), 'bam');
             assert.equal(instance.translate('hello', { locale: 'foo', name: 'Martin' }), 'Hallo Martin!');
@@ -315,15 +315,15 @@ describe('translate', function() {
           });
         });
 
-        describe('with multiple global `fallbackLocales` present', function() {
-          it('returns the entry of the last fallback locale', function() {
+        describe('with multiple global `fallbackLocales` present', () => {
+          it('returns the entry of the last fallback locale', () => {
             instance.registerTranslations('de', { bar: { baz: 'bam' } });
             instance.registerTranslations('de', { hello: 'Hallo %(name)s!' });
 
             assert.equal(instance.translate('baz', { locale: 'foo', scope: 'bar' }), 'missing translation: foo.bar.baz');
             assert.equal(instance.translate('hello', { locale: 'foo', name: 'Martin' }), 'missing translation: foo.hello');
 
-            var previousFallbackLocale = instance.setFallbackLocale([ 'bar', 'de' ]);
+            const previousFallbackLocale = instance.setFallbackLocale([ 'bar', 'de' ]);
 
             assert.equal(instance.translate('baz', { locale: 'foo', scope: 'bar' }), 'bam');
             assert.equal(instance.translate('hello', { locale: 'foo', name: 'Martin' }), 'Hallo Martin!');
@@ -331,14 +331,14 @@ describe('translate', function() {
             instance.setFallbackLocale(previousFallbackLocale);
           });
 
-          it('returns the entry of the first fallback locale to have an entry', function() {
+          it('returns the entry of the first fallback locale to have an entry', () => {
             instance.registerTranslations('de', { bar: { baz: 'bam' } });
             instance.registerTranslations('de', { hello: 'Hallo %(name)s!' });
 
             assert.equal(instance.translate('baz', { locale: 'foo', scope: 'bar' }), 'missing translation: foo.bar.baz');
             assert.equal(instance.translate('hello', { locale: 'foo', name: 'Martin' }), 'missing translation: foo.hello');
 
-            var previousFallbackLocale = instance.setFallbackLocale([ 'bar', 'de', 'baz' ]);
+            const previousFallbackLocale = instance.setFallbackLocale([ 'bar', 'de', 'baz' ]);
 
             assert.equal(instance.translate('baz', { locale: 'foo', scope: 'bar' }), 'bam');
             assert.equal(instance.translate('hello', { locale: 'foo', name: 'Martin' }), 'Hallo Martin!');
@@ -347,8 +347,8 @@ describe('translate', function() {
           });
         });
 
-        describe('with a `fallbackLocale` provided as option', function() {
-          it('returns the entry of the fallback locale', function() {
+        describe('with a `fallbackLocale` provided as option', () => {
+          it('returns the entry of the fallback locale', () => {
             instance.registerTranslations('en', { bar: { baz: 'bam' } });
             instance.registerTranslations('en', { hello: 'Hello, %(name)s!' });
 
@@ -357,8 +357,8 @@ describe('translate', function() {
           });
         });
 
-        describe('with multiple `fallbackLocales` provided as option', function() {
-          it('returns the entry of the last fallback locale', function() {
+        describe('with multiple `fallbackLocales` provided as option', () => {
+          it('returns the entry of the last fallback locale', () => {
             instance.registerTranslations('en', { bar: { baz: 'bam' } });
             instance.registerTranslations('en', { hello: 'Hello, %(name)s!' });
 
@@ -366,7 +366,7 @@ describe('translate', function() {
             assert.equal(instance.translate('hello', { locale: 'foo', fallbackLocale: ['bar', 'en'], name: 'Martin' }), 'Hello, Martin!');
           });
 
-          it('returns the entry of the first fallback locale that has an entry', function() {
+          it('returns the entry of the first fallback locale that has an entry', () => {
             instance.registerTranslations('en', { bar: { baz: 'bam' } });
             instance.registerTranslations('en', { hello: 'Hello, %(name)s!' });
 
@@ -377,26 +377,26 @@ describe('translate', function() {
       });
     });
 
-    describe('without a valid key as first argument', function() {
-      it('throws an invalid argument error', function() {
-        var keys = [undefined, null, 42, {}, new Date(), /./, function() {}, [], ''];
+    describe('without a valid key as first argument', () => {
+      it('throws an invalid argument error', () => {
+        const keys = [undefined, null, 42, {}, new Date(), /./, () => {}, [], ''];
 
-        for (var i = 0, ii = keys.length; i < ii; i++) {
-          assert.throws(function() { instance.translate(keys[i]); }, /invalid argument/);
+        for (let i = 0, ii = keys.length; i < ii; i++) {
+          assert.throws(() => { instance.translate(keys[i]); }, /invalid argument/);
         }
       });
     });
 
-    describe('with global interpolate setting set to false', function() {
-      it('will not interpolate', function() {
-        var current = instance._registry.interpolations;
+    describe('with global interpolate setting set to false', () => {
+      it('will not interpolate', () => {
+        const current = instance._registry.interpolations;
 
         instance.registerTranslations('en', { 'hello':'Hello from %(brand)s!' });
         instance.registerInterpolations({ brand: 'Z' });
 
         assert.equal(instance.translate('hello'), 'Hello from Z!');
 
-        var prev = instance.setInterpolate(false);
+        const prev = instance.setInterpolate(false);
         assert.equal(instance.translate('hello'), 'Hello from %(brand)s!');
         assert.equal(instance.translate('hello', { interpolate: true }), 'Hello from %(brand)s!');
         instance.setInterpolate(prev);
@@ -406,54 +406,54 @@ describe('translate', function() {
     });
   });
 
-  describe('#translate', function() {
-    it('is a function', function() {
+  describe('#translate', () => {
+    it('is a function', () => {
       assert.isFunction(instance.translate);
     });
   });
 
-  describe('#getLocale', function() {
-    it('is a function', function() {
+  describe('#getLocale', () => {
+    it('is a function', () => {
       assert.isFunction(instance.getLocale);
     });
 
-    it('returns the locale stored in the registry', function() {
+    it('returns the locale stored in the registry', () => {
       assert.equal(instance.getLocale(), instance._registry.locale);
     });
 
-    it('returns "en" by default', function() {
+    it('returns "en" by default', () => {
       assert.equal(instance.getLocale(), 'en');
     });
   });
 
-  describe('#setLocale', function() {
-    it('is a function', function() {
+  describe('#setLocale', () => {
+    it('is a function', () => {
       assert.isFunction(instance.setLocale);
     });
 
-    it('sets the locale stored in the registry', function() {
+    it('sets the locale stored in the registry', () => {
       instance.setLocale('foo');
       assert.equal(instance._registry.locale, 'foo');
     });
 
-    it('returns the previous locale that was stored in the registry', function() {
-      var current  = instance.getLocale();
-      var previous = instance.setLocale(current + 'x');
+    it('returns the previous locale that was stored in the registry', () => {
+      const current  = instance.getLocale();
+      const previous = instance.setLocale(`${current}x`);
       assert.equal(previous, current);
     });
 
-    describe('when called with a locale that differs from the current one', function() {
-      it('emits a "localechange" event', function(done) {
-        var handler = function() { done() };
+    describe('when called with a locale that differs from the current one', () => {
+      it('emits a "localechange" event', done => {
+        const handler = () => { done() };
         instance.onLocaleChange(handler);
-        instance.setLocale(instance.getLocale() + 'x');
+        instance.setLocale(`${instance.getLocale()}x`);
         instance.offLocaleChange(handler);
       });
     });
 
-    describe('when called with the current locale', function() {
-      it('does not emit a "localechange" event', function(done) {
-        var handler = function() { done('event was emitted'); };
+    describe('when called with the current locale', () => {
+      it('does not emit a "localechange" event', done => {
+        const handler = () => { done('event was emitted'); };
         instance.onLocaleChange(handler);
         instance.setLocale(instance.getLocale());
         instance.offLocaleChange(handler);
@@ -462,152 +462,152 @@ describe('translate', function() {
     });
   });
 
-  describe('#getFallbackLocale', function() {
-    it('is a function', function() {
+  describe('#getFallbackLocale', () => {
+    it('is a function', () => {
       assert.isFunction(instance.getFallbackLocale);
     });
 
-    it('returns the fallback locale stored in the registry', function() {
+    it('returns the fallback locale stored in the registry', () => {
       assert.equal(instance.getFallbackLocale(), instance._registry.fallbackLocales);
     });
 
-    it('returns an empty array by default', function() {
+    it('returns an empty array by default', () => {
       assert.deepEqual(instance.getFallbackLocale(), []);
     });
   });
 
-  describe('#setFallbackLocale', function() {
-    it('is a function', function() {
+  describe('#setFallbackLocale', () => {
+    it('is a function', () => {
       assert.isFunction(instance.setFallbackLocale);
     });
 
-    it('sets the fallback locale stored in the registry', function() {
+    it('sets the fallback locale stored in the registry', () => {
       instance.setFallbackLocale('foo');
       assert.deepEqual(instance._registry.fallbackLocales, ['foo']);
     });
 
-    it('returns the previous fallback locale that was stored in the registry', function() {
-      var current  = instance.getFallbackLocale();
-      var previous = instance.setFallbackLocale(current + 'x');
+    it('returns the previous fallback locale that was stored in the registry', () => {
+      const current  = instance.getFallbackLocale();
+      const previous = instance.setFallbackLocale(`${current}x`);
       assert.equal(previous, current);
     });
   });
 
-  describe('#getAvailableLocales', function() {
-    it('is a function', function() {
+  describe('#getAvailableLocales', () => {
+    it('is a function', () => {
       assert.isFunction(instance.getAvailableLocales);
     });
 
-    it('returns the locales of the registered translations by default', function() {
+    it('returns the locales of the registered translations by default', () => {
       assert.deepEqual(instance.getAvailableLocales(), Object.keys(instance._registry.translations));
     });
   });
 
-  describe('#setAvailableLocales', function() {
-    it('is a function', function() {
+  describe('#setAvailableLocales', () => {
+    it('is a function', () => {
       assert.isFunction(instance.setAvailableLocales);
     });
 
-    it('sets the locales available', function() {
+    it('sets the locales available', () => {
       instance.setAvailableLocales(['foo', 'bar']);
       assert.deepEqual(instance._registry.availableLocales, ['foo', 'bar']);
     });
 
-    it('returns the previous available locales', function() {
-      var current  = instance.getAvailableLocales();
-      var previous = instance.setAvailableLocales(current.concat('x'));
+    it('returns the previous available locales', () => {
+      const current  = instance.getAvailableLocales();
+      const previous = instance.setAvailableLocales(current.concat('x'));
       assert.deepEqual(previous, current);
     });
   });
 
-  describe('#withLocale', function() {
-    it('is a function', function() {
+  describe('#withLocale', () => {
+    it('is a function', () => {
       assert.isFunction(instance.withLocale);
     });
 
-    it('temporarily changes the current locale within the callback', function() {
-      var locale = instance.getLocale();
+    it('temporarily changes the current locale within the callback', () => {
+      const locale = instance.getLocale();
 
-      instance.withLocale(locale + 'x', function() {
-        assert.equal(instance.getLocale(), locale + 'x');
+      instance.withLocale(`${locale}x`, () => {
+        assert.equal(instance.getLocale(), `${locale}x`);
       });
 
       assert.equal(instance.getLocale(), locale);
     });
 
-    it('allows a custom callback context to be set', function() {
+    it('allows a custom callback context to be set', () => {
       instance.withLocale('foo', function() {
         assert.equal(this.bar, 'baz');
       }, { bar: 'baz' })
     });
 
-    it('does not emit a "localechange" event', function(done) {
-      var handler = function() { done('event was emitted'); };
+    it('does not emit a "localechange" event', done => {
+      const handler = () => { done('event was emitted'); };
       instance.onLocaleChange(handler);
-      instance.withLocale(instance.getLocale() + 'x', function() {});
+      instance.withLocale(`${instance.getLocale()}x`, () => {});
       instance.offLocaleChange(handler);
       setTimeout(done, 100);
     });
 
-    it('returns the return value of the callback', function() {
-      var result = instance.withLocale('foo', function() { return 'bar'; });
+    it('returns the return value of the callback', () => {
+      const result = instance.withLocale('foo', () => 'bar');
       assert.equal(result, 'bar');
     });
   });
 
-  describe('#withScope', function() {
-    it('is a function', function() {
+  describe('#withScope', () => {
+    it('is a function', () => {
       assert.isFunction(instance.withScope);
     });
 
-    it('temporarily changes the current scope within the callback', function() {
-      var scope = instance._registry.scope;
+    it('temporarily changes the current scope within the callback', () => {
+      const scope = instance._registry.scope;
 
-      instance.withScope(scope + 'x', function() {
-        assert.equal(instance._registry.scope, scope + 'x');
+      instance.withScope(`${scope}x`, () => {
+        assert.equal(instance._registry.scope, `${scope}x`);
       });
 
       assert.equal(instance._registry.scope, scope);
     });
 
-    it('allows a custom callback context to be set', function() {
+    it('allows a custom callback context to be set', () => {
       instance.withScope('foo', function() {
         assert.equal(this.bar, 'baz');
       }, { bar: 'baz' })
     });
 
-    it('returns the return value of the callback', function() {
-      var result = instance.withScope('foo', function() { return 'bar'; });
+    it('returns the return value of the callback', () => {
+      const result = instance.withScope('foo', () => 'bar');
       assert.equal(result, 'bar');
     });
   });
 
-  describe('#onLocaleChange', function() {
-    it('is a function', function() {
+  describe('#onLocaleChange', () => {
+    it('is a function', () => {
       assert.isFunction(instance.onLocaleChange);
     });
 
-    it('is called when the locale changes', function(done) {
-      var handler = function() { done(); };
+    it('is called when the locale changes', done => {
+      const handler = () => { done(); };
       instance.onLocaleChange(handler);
-      instance.setLocale(instance.getLocale() + 'x');
+      instance.setLocale(`${instance.getLocale()}x`);
       instance.offLocaleChange(handler);
     });
 
-    it('is not called when the locale does not change', function(done) {
-      var handler = function() { done('function was called'); };
+    it('is not called when the locale does not change', done => {
+      const handler = () => { done('function was called'); };
       instance.onLocaleChange(handler);
       instance.setLocale(instance.getLocale());
       instance.offLocaleChange(handler);
       setTimeout(done, 100);
     });
 
-    describe('when called', function() {
-      it('exposes both the new and old locale as arguments', function(done) {
-        var oldLocale = instance.getLocale();
-        var newLocale = oldLocale + 'x';
+    describe('when called', () => {
+      it('exposes both the new and old locale as arguments', done => {
+        const oldLocale = instance.getLocale();
+        const newLocale = `${oldLocale}x`;
 
-        var handler = function(locale, previousLocale) {
+        const handler = (locale, previousLocale) => {
           assert.equal(locale, newLocale);
           assert.equal(previousLocale, oldLocale);
           done();
@@ -619,9 +619,9 @@ describe('translate', function() {
       });
     });
 
-    describe('when called more than 10 times', function() {
-      it('does not let Node issue a warning about a possible memory leak', function() {
-        var oldConsoleError = console.error;
+    describe('when called more than 10 times', () => {
+      it('does not let Node issue a warning about a possible memory leak', () => {
+        const oldConsoleError = console.error;
 
         console.error = function(message) {
           if (/EventEmitter memory leak/.test(message)) {
@@ -631,10 +631,12 @@ describe('translate', function() {
           }
         };
 
-        var handlers = [], handler, i;
+        const handlers = [];
+        let handler;
+        let i;
 
         for (i = 0; i < 11; i++) {
-          handler = function() {};
+          handler = () => {};
           instance.onLocaleChange(handler);
           handlers.push(handler);
         }
@@ -648,51 +650,51 @@ describe('translate', function() {
     })
   });
 
-  describe('#offLocaleChange', function() {
-    it('is a function', function() {
+  describe('#offLocaleChange', () => {
+    it('is a function', () => {
       assert.isFunction(instance.offLocaleChange);
     });
 
-    it('stops the emission of events to the handler', function(done) {
-      var count = 0;
+    it('stops the emission of events to the handler', done => {
+      let count = 0;
 
-      var handler = function() { count++; };
+      const handler = () => { count++; };
 
       instance.onLocaleChange(handler);
-      instance.setLocale(instance.getLocale() + 'x');
-      instance.setLocale(instance.getLocale() + 'x');
+      instance.setLocale(`${instance.getLocale()}x`);
+      instance.setLocale(`${instance.getLocale()}x`);
       instance.offLocaleChange(handler);
-      instance.setLocale(instance.getLocale() + 'x');
+      instance.setLocale(`${instance.getLocale()}x`);
 
-      setTimeout(function() {
+      setTimeout(() => {
         assert.equal(count, 2, 'handler was called although deactivated');
         done();
       }, 100);
     });
   });
 
-  describe('#onTranslationNotFound', function() {
-    it('is a function', function() {
+  describe('#onTranslationNotFound', () => {
+    it('is a function', () => {
       assert.isFunction(instance.onTranslationNotFound);
     });
 
-    it('is called when the translation is missing and a fallback is provided as option', function(done) {
-      var handler = function() { done(); };
+    it('is called when the translation is missing and a fallback is provided as option', done => {
+      const handler = () => { done(); };
       instance.onTranslationNotFound(handler);
       instance.translate('foo', { fallback: 'bar' });
       instance.offTranslationNotFound(handler);
     });
 
-    it('is not called when the translation is missing and no fallback is provided as option', function(done) {
-      var handler = function() { done('function was called'); };
+    it('is not called when the translation is missing and no fallback is provided as option', done => {
+      const handler = () => { done('function was called'); };
       instance.onTranslationNotFound(handler);
       instance.translate('foo', { fallback: undefined });
       instance.offTranslationNotFound(handler);
       setTimeout(done, 100);
     });
 
-    it('is not called when a translation exists', function(done) {
-      var handler = function() { done('function was called'); };
+    it('is not called when a translation exists', done => {
+      const handler = () => { done('function was called'); };
       instance.registerTranslations('xx', { foo: 'bar' });
       instance.onTranslationNotFound(handler);
       instance.translate('foo', { locale: 'xx', fallback: 'baz' });
@@ -700,9 +702,9 @@ describe('translate', function() {
       setTimeout(done, 100);
     });
 
-    describe('when called', function() {
-      it('exposes the current locale, key, fallback and scope as arguments', function(done) {
-        var handler = function(locale, key, fallback, scope) {
+    describe('when called', () => {
+      it('exposes the current locale, key, fallback and scope as arguments', done => {
+        const handler = (locale, key, fallback, scope) => {
           assert.equal('yy', locale);
           assert.equal('foo', key);
           assert.equal('bar', fallback);
@@ -717,15 +719,15 @@ describe('translate', function() {
     });
   });
 
-  describe('#offTranslationNotFound', function() {
-    it('is a function', function() {
+  describe('#offTranslationNotFound', () => {
+    it('is a function', () => {
       assert.isFunction(instance.offTranslationNotFound);
     });
 
-    it('stops the emission of events to the handler', function(done) {
-      var count = 0;
+    it('stops the emission of events to the handler', done => {
+      let count = 0;
 
-      var handler = function() { count++; };
+      const handler = () => { count++; };
 
       instance.onTranslationNotFound(handler);
       instance.translate('foo', { fallback: 'bar' });
@@ -733,34 +735,34 @@ describe('translate', function() {
       instance.offTranslationNotFound(handler);
       instance.translate('foo', { fallback: 'bar' });
 
-      setTimeout(function() {
+      setTimeout(() => {
         assert.equal(count, 2, 'handler was called although deactivated');
         done();
       }, 100);
     });
   });
 
-  describe('#getSeparator', function() {
-    it('is a function', function() {
+  describe('#getSeparator', () => {
+    it('is a function', () => {
       assert.isFunction(instance.getSeparator);
     });
 
-    it('returns the separator stored in the registry', function() {
+    it('returns the separator stored in the registry', () => {
       assert.equal(instance.getSeparator(), instance._registry.separator);
     });
 
-    it('returns "." by default', function() {
+    it('returns "." by default', () => {
       assert.equal(instance.getSeparator(), '.');
     });
   });
 
-  describe('#setSeparator', function() {
-    it('is a function', function() {
+  describe('#setSeparator', () => {
+    it('is a function', () => {
       assert.isFunction(instance.setSeparator);
     });
 
-    it('sets the separator stored in the registry', function() {
-      var prev = instance._registry.separator;
+    it('sets the separator stored in the registry', () => {
+      const prev = instance._registry.separator;
 
       instance.setSeparator('*');
       assert.equal(instance._registry.separator, '*');
@@ -768,35 +770,35 @@ describe('translate', function() {
       instance._registry.separator = prev;
     });
 
-    it('returns the previous separator that was stored in the registry', function() {
-      var current  = instance.getSeparator();
-      var previous = instance.setSeparator(current + 'x');
+    it('returns the previous separator that was stored in the registry', () => {
+      const current  = instance.getSeparator();
+      const previous = instance.setSeparator(`${current}x`);
       assert.equal(previous, current);
       instance.setSeparator(current);
     });
   });
 
-  describe('#getInterpolate', function() {
-    it('is a function', function() {
+  describe('#getInterpolate', () => {
+    it('is a function', () => {
       assert.isFunction(instance.getInterpolate);
     });
 
-    it('returns the setting stored in the registry', function() {
+    it('returns the setting stored in the registry', () => {
       assert.equal(instance.getInterpolate(), instance._registry.interpolate);
     });
 
-    it('returns true by default', function() {
+    it('returns true by default', () => {
       assert.equal(instance.getInterpolate(), true);
     });
   });
 
-  describe('#setInterpolate', function() {
-    it('is a function', function() {
+  describe('#setInterpolate', () => {
+    it('is a function', () => {
       assert.isFunction(instance.setInterpolate);
     });
 
-    it('sets the interpolate stored in the registry', function() {
-      var prev = instance._registry.interpolate;
+    it('sets the interpolate stored in the registry', () => {
+      const prev = instance._registry.interpolate;
 
       instance.setInterpolate(true);
       assert.equal(instance._registry.interpolate, true);
@@ -804,36 +806,36 @@ describe('translate', function() {
       instance._registry.interpolate = prev;
     });
 
-    it('returns the previous interpolate that was stored in the registry', function() {
-      var current  = instance.getInterpolate();
-      var previous = instance.setInterpolate(true);
+    it('returns the previous interpolate that was stored in the registry', () => {
+      const current  = instance.getInterpolate();
+      const previous = instance.setInterpolate(true);
       assert.equal(previous, current);
       instance.setInterpolate(current);
     });
   });
 
-  describe('#getKeyTransformer', function() {
-    it('is a function', function() {
+  describe('#getKeyTransformer', () => {
+    it('is a function', () => {
       assert.isFunction(instance.getKeyTransformer);
     });
 
-    it('returns the setting stored in the registry', function() {
+    it('returns the setting stored in the registry', () => {
       assert.equal(instance.getKeyTransformer(), instance._registry.keyTransformer);
     });
   });
 
-  describe('#setKeyTransformer', function() {
-    var transformer = function(key, options) {
+  describe('#setKeyTransformer', () => {
+    const transformer = (key, options) => {
       assert.deepEqual({ locale: 'xx', bingo: 'bongo' }, options);
       return key.toLowerCase();
     };
 
-    it('is a function', function() {
+    it('is a function', () => {
       assert.isFunction(instance.setKeyTransformer);
     });
 
-    it('sets the keyTransformer stored in the registry', function() {
-      var prev = instance._registry.keyTransformer;
+    it('sets the keyTransformer stored in the registry', () => {
+      const prev = instance._registry.keyTransformer;
 
       instance.setKeyTransformer(transformer);
       assert.equal(instance._registry.keyTransformer, transformer);
@@ -841,17 +843,17 @@ describe('translate', function() {
       instance._registry.keyTransformer = prev;
     });
 
-    it('returns the previous keyTransformer that was stored in the registry', function() {
-      var current  = instance.getKeyTransformer();
-      var previous = instance.setKeyTransformer(transformer);
+    it('returns the previous keyTransformer that was stored in the registry', () => {
+      const current  = instance.getKeyTransformer();
+      const previous = instance.setKeyTransformer(transformer);
       assert.equal(previous, current);
       instance.setKeyTransformer(current);
     });
 
-    it('uses the custom key transformer when translating', function() {
+    it('uses the custom key transformer when translating', () => {
       instance.registerTranslations('xx', { foo: 'bar' });
 
-      var translation = instance.translate('FOO', { locale: 'xx', bingo: 'bongo' });
+      let translation = instance.translate('FOO', { locale: 'xx', bingo: 'bongo' });
       assert.matches(translation, /missing translation/);
 
       instance.setKeyTransformer(transformer);
@@ -860,497 +862,497 @@ describe('translate', function() {
     });
   });
 
-  describe('#withSeparator', function() {
-    it('is a function', function() {
+  describe('#withSeparator', () => {
+    it('is a function', () => {
       assert.isFunction(instance.withSeparator);
     });
 
-    it('temporarily changes the current separator within the callback', function() {
-      var separator = instance.getSeparator();
+    it('temporarily changes the current separator within the callback', () => {
+      const separator = instance.getSeparator();
 
-      instance.withSeparator(separator + 'x', function() {
-        assert.equal(instance.getSeparator(), separator + 'x');
+      instance.withSeparator(`${separator}x`, () => {
+        assert.equal(instance.getSeparator(), `${separator}x`);
       });
 
       assert.equal(instance.getSeparator(), separator);
     });
 
-    it('allows a custom callback context to be set', function() {
+    it('allows a custom callback context to be set', () => {
       instance.withSeparator('foo', function() {
         assert.equal(this.bar, 'baz');
       }, { bar: 'baz' })
     });
 
-    it('returns the return value of the callback', function() {
-      var result = instance.withSeparator('foo', function() { return 'bar'; });
+    it('returns the return value of the callback', () => {
+      const result = instance.withSeparator('foo', () => 'bar');
       assert.equal(result, 'bar');
     });
   });
 
-  describe('#localize', function() {
-    before(function() {
+  describe('#localize', () => {
+    before(() => {
       instance.setLocale('en');
     });
 
-    it('is a function', function() {
+    it('is a function', () => {
       assert.isFunction(instance.localize);
     });
 
-    it('does not mutate these options', function() {
-      var options = { locale: 'en', scope: ['foo1', 'foo2'], count: 3, bar: { baz: 'bum' } };
+    it('does not mutate these options', () => {
+      const options = { locale: 'en', scope: ['foo1', 'foo2'], count: 3, bar: { baz: 'bum' } };
       instance.localize(new Date(), options);
       assert.deepEqual(options, { locale: 'en', scope: ['foo1', 'foo2'], count: 3, bar: { baz: 'bum' } });
     });
 
-    describe('when called without a date as first argument', function() {
-      it('throws an invalid argument error', function() {
-        assert.throws(function() {
+    describe('when called without a date as first argument', () => {
+      it('throws an invalid argument error', () => {
+        assert.throws(() => {
           instance.localize('foo');
         }, /invalid argument/);
       });
     });
 
-    describe('when called with a date as first argument', function() {
-      var date = new time.Date('Thu Feb 6 2014 05:09:04 GMT+0100 (CET)');
+    describe('when called with a date as first argument', () => {
+      const date = new time.Date('Thu Feb 6 2014 05:09:04 GMT+0100 (CET)');
       date.setTimezone('America/Chicago');
 
-      describe('without providing options as second argument', function() {
-        it('returns the default localization for that date', function() {
-          var result = instance.localize(date);
+      describe('without providing options as second argument', () => {
+        it('returns the default localization for that date', () => {
+          const result = instance.localize(date);
           assert.equal(result, 'Wed, 5 Feb 2014 22:09');
         });
       });
 
-      describe('providing a `format` key in the options', function() {
-        describe('with format = "default"', function() {
-          it('returns the default localization for that date', function() {
-            var result = instance.localize(date, { format: 'default' });
+      describe('providing a `format` key in the options', () => {
+        describe('with format = "default"', () => {
+          it('returns the default localization for that date', () => {
+            const result = instance.localize(date, { format: 'default' });
             assert.equal(result, 'Wed, 5 Feb 2014 22:09');
           });
         });
 
-        describe('with format = "short"', function() {
-          it('returns the short localization for that date', function() {
-            var result = instance.localize(date, { format: 'short' });
+        describe('with format = "short"', () => {
+          it('returns the short localization for that date', () => {
+            const result = instance.localize(date, { format: 'short' });
             assert.equal(result, '5 Feb 22:09');
           });
         });
 
-        describe('with format = "long"', function() {
-          it('returns the long localization for that date', function() {
-            var result = instance.localize(date, { format: 'long' });
+        describe('with format = "long"', () => {
+          it('returns the long localization for that date', () => {
+            const result = instance.localize(date, { format: 'long' });
             assert.equal(result, 'Wednesday, February 5th, 2014 22:09:04 -06:00');
           });
         });
 
-        describe('with an unknown format', function() {
-          it('returns a string containing "missing translation"', function() {
-            var result = instance.localize(date, { format: '__invalid__' });
+        describe('with an unknown format', () => {
+          it('returns a string containing "missing translation"', () => {
+            const result = instance.localize(date, { format: '__invalid__' });
             assert.matches(result, /missing translation/);
           });
         });
       });
 
-      describe('providing a `type` key in the options', function() {
-        describe('with type = "datetime"', function() {
-          it('returns the default localization for that date', function() {
-            var result = instance.localize(date, { type: 'datetime' });
+      describe('providing a `type` key in the options', () => {
+        describe('with type = "datetime"', () => {
+          it('returns the default localization for that date', () => {
+            const result = instance.localize(date, { type: 'datetime' });
             assert.equal(result, 'Wed, 5 Feb 2014 22:09');
           });
         });
 
-        describe('with type = "date"', function() {
-          it('returns the date localization for that date', function() {
-            var result = instance.localize(date, { type: 'date' });
+        describe('with type = "date"', () => {
+          it('returns the date localization for that date', () => {
+            const result = instance.localize(date, { type: 'date' });
             assert.equal(result, 'Wed, 5 Feb 2014');
           });
         });
 
-        describe('with type = "time"', function() {
-          it('returns the time localization for that date', function() {
-            var result = instance.localize(date, { type: 'time' });
+        describe('with type = "time"', () => {
+          it('returns the time localization for that date', () => {
+            const result = instance.localize(date, { type: 'time' });
             assert.equal(result, '22:09');
           });
         });
 
-        describe('with an unknown type', function() {
-          it('returns a string containing "missing translation"', function() {
-            var result = instance.localize(date, { type: '__invalid__' });
+        describe('with an unknown type', () => {
+          it('returns a string containing "missing translation"', () => {
+            const result = instance.localize(date, { type: '__invalid__' });
             assert.matches(result, /missing translation/);
           });
         });
       });
 
-      describe('providing both a `type` key and a `format` key in the options', function() {
-        describe('with type = "datetime" and format = "default"', function() {
-          it('returns the default localization for that date', function() {
-            var result = instance.localize(date, { type: 'datetime', format: 'default' });
+      describe('providing both a `type` key and a `format` key in the options', () => {
+        describe('with type = "datetime" and format = "default"', () => {
+          it('returns the default localization for that date', () => {
+            const result = instance.localize(date, { type: 'datetime', format: 'default' });
             assert.equal(result, 'Wed, 5 Feb 2014 22:09');
           });
         });
 
-        describe('with type = "datetime" and format = "short"', function() {
-          it('returns the short datetime localization for that date', function() {
-            var result = instance.localize(date, { type: 'datetime', format: 'short' });
+        describe('with type = "datetime" and format = "short"', () => {
+          it('returns the short datetime localization for that date', () => {
+            const result = instance.localize(date, { type: 'datetime', format: 'short' });
             assert.equal(result, '5 Feb 22:09');
           });
         });
 
-        describe('with type = "datetime" and format = "long"', function() {
-          it('returns the long datetime localization for that date', function() {
-            var result = instance.localize(date, { type: 'datetime', format: 'long' });
+        describe('with type = "datetime" and format = "long"', () => {
+          it('returns the long datetime localization for that date', () => {
+            const result = instance.localize(date, { type: 'datetime', format: 'long' });
             assert.equal(result, 'Wednesday, February 5th, 2014 22:09:04 -06:00');
           });
         });
 
-        describe('with type = "time" and format = "default"', function() {
-          it('returns the default time localization for that date', function() {
-            var result = instance.localize(date, { type: 'time', format: 'default' });
+        describe('with type = "time" and format = "default"', () => {
+          it('returns the default time localization for that date', () => {
+            const result = instance.localize(date, { type: 'time', format: 'default' });
             assert.equal(result, '22:09');
           });
         });
 
-        describe('with type = "time" and format = "short"', function() {
-          it('returns the short time localization for that date', function() {
-            var result = instance.localize(date, { type: 'time', format: 'short' });
+        describe('with type = "time" and format = "short"', () => {
+          it('returns the short time localization for that date', () => {
+            const result = instance.localize(date, { type: 'time', format: 'short' });
             assert.equal(result, '22:09');
           });
         });
 
-        describe('with type = "time" and format = "long"', function() {
-          it('returns the long time localization for that date', function() {
-            var result = instance.localize(date, { type: 'time', format: 'long' });
+        describe('with type = "time" and format = "long"', () => {
+          it('returns the long time localization for that date', () => {
+            const result = instance.localize(date, { type: 'time', format: 'long' });
             assert.equal(result, '22:09:04 -06:00');
           });
         });
 
-        describe('with type = "date" and format = "default"', function() {
-          it('returns the default date localization for that date', function() {
-            var result = instance.localize(date, { type: 'date', format: 'default' });
+        describe('with type = "date" and format = "default"', () => {
+          it('returns the default date localization for that date', () => {
+            const result = instance.localize(date, { type: 'date', format: 'default' });
             assert.equal(result, 'Wed, 5 Feb 2014');
           });
         });
 
-        describe('with type = "date" and format = "short"', function() {
-          it('returns the short date localization for that date', function() {
-            var result = instance.localize(date, { type: 'date', format: 'short' });
+        describe('with type = "date" and format = "short"', () => {
+          it('returns the short date localization for that date', () => {
+            const result = instance.localize(date, { type: 'date', format: 'short' });
             assert.equal(result, 'Feb 5');
           });
         });
 
-        describe('with type = "date" and format = "long"', function() {
-          it('returns the long date localization for that date', function() {
-            var result = instance.localize(date, { type: 'date', format: 'long' });
+        describe('with type = "date" and format = "long"', () => {
+          it('returns the long date localization for that date', () => {
+            const result = instance.localize(date, { type: 'date', format: 'long' });
             assert.equal(result, 'Wednesday, February 5th, 2014');
           });
         });
 
-        describe('with unknown type and unknown format', function() {
-          it('returns a string containing "missing translation"', function() {
-            var result = instance.localize(date, { type: '__invalid__', format: '__invalid__' });
+        describe('with unknown type and unknown format', () => {
+          it('returns a string containing "missing translation"', () => {
+            const result = instance.localize(date, { type: '__invalid__', format: '__invalid__' });
             assert.matches(result, /missing translation/);
           });
         });
       });
 
-      describe('with locale set to "de"', function() {
-        var prev;
+      describe('with locale set to "de"', () => {
+        let prev;
 
-        beforeEach(function() {
+        beforeEach(() => {
           instance.registerTranslations('de', require('./locales/de'));
           prev = instance.setLocale('de');
         });
 
-        afterEach(function() {
+        afterEach(() => {
           instance.setLocale(prev);
         });
 
-        describe('without providing options as second argument', function() {
-          it('returns the default localization for that date', function() {
-            var result = instance.localize(date);
+        describe('without providing options as second argument', () => {
+          it('returns the default localization for that date', () => {
+            const result = instance.localize(date);
             assert.equal(result, 'Mi, 5. Feb 2014, 22:09 Uhr');
           });
         });
 
-        describe('providing a `format` key in the options', function() {
-          describe('with format = "default"', function() {
-            it('returns the default localization for that date', function() {
-              var result = instance.localize(date, { format: 'default' });
+        describe('providing a `format` key in the options', () => {
+          describe('with format = "default"', () => {
+            it('returns the default localization for that date', () => {
+              const result = instance.localize(date, { format: 'default' });
               assert.equal(result, 'Mi, 5. Feb 2014, 22:09 Uhr');
             });
           });
 
-          describe('with format = "short"', function() {
-            it('returns the short localization for that date', function() {
-              var result = instance.localize(date, { format: 'short' });
+          describe('with format = "short"', () => {
+            it('returns the short localization for that date', () => {
+              const result = instance.localize(date, { format: 'short' });
               assert.equal(result, '05.02.14 22:09');
             });
           });
 
-          describe('with format = "long"', function() {
-            it('returns the long localization for that date', function() {
-              var result = instance.localize(date, { format: 'long' });
+          describe('with format = "long"', () => {
+            it('returns the long localization for that date', () => {
+              const result = instance.localize(date, { format: 'long' });
               assert.equal(result, 'Mittwoch, 5. Februar 2014, 22:09:04 -06:00');
             });
           });
 
-          describe('with an unknown format', function() {
-            it('returns a string containing "missing translation"', function() {
-              var result = instance.localize(date, { format: '__invalid__' });
+          describe('with an unknown format', () => {
+            it('returns a string containing "missing translation"', () => {
+              const result = instance.localize(date, { format: '__invalid__' });
               assert.matches(result, /missing translation/);
             });
           });
         });
 
-        describe('providing a `type` key in the options', function() {
-          describe('with type = "datetime"', function() {
-            it('returns the default localization for that date', function() {
-              var result = instance.localize(date, { type: 'datetime' });
+        describe('providing a `type` key in the options', () => {
+          describe('with type = "datetime"', () => {
+            it('returns the default localization for that date', () => {
+              const result = instance.localize(date, { type: 'datetime' });
               assert.equal(result, 'Mi, 5. Feb 2014, 22:09 Uhr');
             });
           });
 
-          describe('with type = "date"', function() {
-            it('returns the date localization for that date', function() {
-              var result = instance.localize(date, { type: 'date' });
+          describe('with type = "date"', () => {
+            it('returns the date localization for that date', () => {
+              const result = instance.localize(date, { type: 'date' });
               assert.equal(result, 'Mi, 5. Feb 2014');
             });
           });
 
-          describe('with type = "time"', function() {
-            it('returns the time localization for that date', function() {
-              var result = instance.localize(date, { type: 'time' });
+          describe('with type = "time"', () => {
+            it('returns the time localization for that date', () => {
+              const result = instance.localize(date, { type: 'time' });
               assert.equal(result, '22:09 Uhr');
             });
           });
 
-          describe('with an unknown type', function() {
-            it('returns a string containing "missing translation"', function() {
-              var result = instance.localize(date, { type: '__invalid__' });
+          describe('with an unknown type', () => {
+            it('returns a string containing "missing translation"', () => {
+              const result = instance.localize(date, { type: '__invalid__' });
               assert.matches(result, /missing translation/);
             });
           });
         });
 
-        describe('providing both a `type` key and a `format` key in the options', function() {
-          describe('with type = "datetime" and format = "default"', function() {
-            it('returns the default localization for that date', function() {
-              var result = instance.localize(date, { type: 'datetime', format: 'default' });
+        describe('providing both a `type` key and a `format` key in the options', () => {
+          describe('with type = "datetime" and format = "default"', () => {
+            it('returns the default localization for that date', () => {
+              const result = instance.localize(date, { type: 'datetime', format: 'default' });
               assert.equal(result, 'Mi, 5. Feb 2014, 22:09 Uhr');
             });
           });
 
-          describe('with type = "datetime" and format = "short"', function() {
-            it('returns the short datetime localization for that date', function() {
-              var result = instance.localize(date, { type: 'datetime', format: 'short' });
+          describe('with type = "datetime" and format = "short"', () => {
+            it('returns the short datetime localization for that date', () => {
+              const result = instance.localize(date, { type: 'datetime', format: 'short' });
               assert.equal(result, '05.02.14 22:09');
             });
           });
 
-          describe('with type = "datetime" and format = "long"', function() {
-            it('returns the long datetime localization for that date', function() {
-              var result = instance.localize(date, { type: 'datetime', format: 'long' });
+          describe('with type = "datetime" and format = "long"', () => {
+            it('returns the long datetime localization for that date', () => {
+              const result = instance.localize(date, { type: 'datetime', format: 'long' });
               assert.equal(result, 'Mittwoch, 5. Februar 2014, 22:09:04 -06:00');
             });
           });
 
-          describe('with type = "time" and format = "default"', function() {
-            it('returns the default time localization for that date', function() {
-              var result = instance.localize(date, { type: 'time', format: 'default' });
+          describe('with type = "time" and format = "default"', () => {
+            it('returns the default time localization for that date', () => {
+              const result = instance.localize(date, { type: 'time', format: 'default' });
               assert.equal(result, '22:09 Uhr');
             });
           });
 
-          describe('with type = "time" and format = "short"', function() {
-            it('returns the short time localization for that date', function() {
-              var result = instance.localize(date, { type: 'time', format: 'short' });
+          describe('with type = "time" and format = "short"', () => {
+            it('returns the short time localization for that date', () => {
+              const result = instance.localize(date, { type: 'time', format: 'short' });
               assert.equal(result, '22:09');
             });
           });
 
-          describe('with type = "time" and format = "long"', function() {
-            it('returns the long time localization for that date', function() {
-              var result = instance.localize(date, { type: 'time', format: 'long' });
+          describe('with type = "time" and format = "long"', () => {
+            it('returns the long time localization for that date', () => {
+              const result = instance.localize(date, { type: 'time', format: 'long' });
               assert.equal(result, '22:09:04 -06:00');
             });
           });
 
-          describe('with type = "date" and format = "default"', function() {
-            it('returns the default date localization for that date', function() {
-              var result = instance.localize(date, { type: 'date', format: 'default' });
+          describe('with type = "date" and format = "default"', () => {
+            it('returns the default date localization for that date', () => {
+              const result = instance.localize(date, { type: 'date', format: 'default' });
               assert.equal(result, 'Mi, 5. Feb 2014');
             });
           });
 
-          describe('with type = "date" and format = "short"', function() {
-            it('returns the short date localization for that date', function() {
-              var result = instance.localize(date, { type: 'date', format: 'short' });
+          describe('with type = "date" and format = "short"', () => {
+            it('returns the short date localization for that date', () => {
+              const result = instance.localize(date, { type: 'date', format: 'short' });
               assert.equal(result, '05.02.14');
             });
           });
 
-          describe('with type = "date" and format = "long"', function() {
-            it('returns the long date localization for that date', function() {
-              var result = instance.localize(date, { type: 'date', format: 'long' });
+          describe('with type = "date" and format = "long"', () => {
+            it('returns the long date localization for that date', () => {
+              const result = instance.localize(date, { type: 'date', format: 'long' });
               assert.equal(result, 'Mittwoch, 5. Februar 2014');
             });
           });
 
-          describe('with unknown type and unknown format', function() {
-            it('returns a string containing "missing translation"', function() {
-              var result = instance.localize(date, { type: '__invalid__', format: '__invalid__' });
+          describe('with unknown type and unknown format', () => {
+            it('returns a string containing "missing translation"', () => {
+              const result = instance.localize(date, { type: '__invalid__', format: '__invalid__' });
               assert.matches(result, /missing translation/);
             });
           });
         });
       });
 
-      describe('with locale set to "pt-br"', function() {
-        var prev;
+      describe('with locale set to "pt-br"', () => {
+        let prev;
 
-        beforeEach(function() {
+        beforeEach(() => {
           instance.registerTranslations('pt-br', require('./locales/pt-br'));
           prev = instance.setLocale('pt-br');
         });
 
-        afterEach(function() {
+        afterEach(() => {
           instance.setLocale(prev);
         });
 
-        describe('without providing options as second argument', function() {
-          it('returns the default localization for that date', function() {
-            var result = instance.localize(date);
+        describe('without providing options as second argument', () => {
+          it('returns the default localization for that date', () => {
+            const result = instance.localize(date);
             assert.equal(result, 'Qua, 5 de Fev de 2014 às 22:09');
           });
         });
 
-        describe('providing a `format` key in the options', function() {
-          describe('with format = "default"', function() {
-            it('returns the default localization for that date', function() {
-              var result = instance.localize(date, { format: 'default' });
+        describe('providing a `format` key in the options', () => {
+          describe('with format = "default"', () => {
+            it('returns the default localization for that date', () => {
+              const result = instance.localize(date, { format: 'default' });
               assert.equal(result, 'Qua, 5 de Fev de 2014 às 22:09');
             });
           });
 
-          describe('with format = "short"', function() {
-            it('returns the short localization for that date', function() {
-              var result = instance.localize(date, { format: 'short' });
+          describe('with format = "short"', () => {
+            it('returns the short localization for that date', () => {
+              const result = instance.localize(date, { format: 'short' });
               assert.equal(result, '05/02/14 às 22:09');
             });
           });
 
-          describe('with format = "long"', function() {
-            it('returns the long localization for that date', function() {
-              var result = instance.localize(date, { format: 'long' });
+          describe('with format = "long"', () => {
+            it('returns the long localization for that date', () => {
+              const result = instance.localize(date, { format: 'long' });
               assert.equal(result, 'Quarta-feira, 5 de Fevereiro de 2014 às 22:09:04 -06:00');
             });
           });
 
-          describe('with an unknown format', function() {
-            it('returns a string containing "missing translation"', function() {
-              var result = instance.localize(date, { format: '__invalid__' });
+          describe('with an unknown format', () => {
+            it('returns a string containing "missing translation"', () => {
+              const result = instance.localize(date, { format: '__invalid__' });
               assert.matches(result, /missing translation/);
             });
           });
         });
 
-        describe('providing a `type` key in the options', function() {
-          describe('with type = "datetime"', function() {
-            it('returns the default localization for that date', function() {
-              var result = instance.localize(date, { type: 'datetime' });
+        describe('providing a `type` key in the options', () => {
+          describe('with type = "datetime"', () => {
+            it('returns the default localization for that date', () => {
+              const result = instance.localize(date, { type: 'datetime' });
               assert.equal(result, 'Qua, 5 de Fev de 2014 às 22:09');
             });
           });
 
-          describe('with type = "date"', function() {
-            it('returns the date localization for that date', function() {
-              var result = instance.localize(date, { type: 'date' });
+          describe('with type = "date"', () => {
+            it('returns the date localization for that date', () => {
+              const result = instance.localize(date, { type: 'date' });
               assert.equal(result, 'Qua, 5 de Fev de 2014');
             });
           });
 
-          describe('with type = "time"', function() {
-            it('returns the time localization for that date', function() {
-              var result = instance.localize(date, { type: 'time' });
+          describe('with type = "time"', () => {
+            it('returns the time localization for that date', () => {
+              const result = instance.localize(date, { type: 'time' });
               assert.equal(result, '22:09');
             });
           });
 
-          describe('with an unknown type', function() {
-            it('returns a string containing "missing translation"', function() {
-              var result = instance.localize(date, { type: '__invalid__' });
+          describe('with an unknown type', () => {
+            it('returns a string containing "missing translation"', () => {
+              const result = instance.localize(date, { type: '__invalid__' });
               assert.matches(result, /missing translation/);
             });
           });
         });
 
-        describe('providing both a `type` key and a `format` key in the options', function() {
-          describe('with type = "datetime" and format = "default"', function() {
-            it('returns the default localization for that date', function() {
-              var result = instance.localize(date, { type: 'datetime', format: 'default' });
+        describe('providing both a `type` key and a `format` key in the options', () => {
+          describe('with type = "datetime" and format = "default"', () => {
+            it('returns the default localization for that date', () => {
+              const result = instance.localize(date, { type: 'datetime', format: 'default' });
               assert.equal(result, 'Qua, 5 de Fev de 2014 às 22:09');
             });
           });
 
-          describe('with type = "datetime" and format = "short"', function() {
-            it('returns the short datetime localization for that date', function() {
-              var result = instance.localize(date, { type: 'datetime', format: 'short' });
+          describe('with type = "datetime" and format = "short"', () => {
+            it('returns the short datetime localization for that date', () => {
+              const result = instance.localize(date, { type: 'datetime', format: 'short' });
               assert.equal(result, '05/02/14 às 22:09');
             });
           });
 
-          describe('with type = "datetime" and format = "long"', function() {
-            it('returns the long datetime localization for that date', function() {
-              var result = instance.localize(date, { type: 'datetime', format: 'long' });
+          describe('with type = "datetime" and format = "long"', () => {
+            it('returns the long datetime localization for that date', () => {
+              const result = instance.localize(date, { type: 'datetime', format: 'long' });
               assert.equal(result, 'Quarta-feira, 5 de Fevereiro de 2014 às 22:09:04 -06:00');
             });
           });
 
-          describe('with type = "time" and format = "default"', function() {
-            it('returns the default time localization for that date', function() {
-              var result = instance.localize(date, { type: 'time', format: 'default' });
+          describe('with type = "time" and format = "default"', () => {
+            it('returns the default time localization for that date', () => {
+              const result = instance.localize(date, { type: 'time', format: 'default' });
               assert.equal(result, '22:09');
             });
           });
 
-          describe('with type = "time" and format = "short"', function() {
-            it('returns the short time localization for that date', function() {
-              var result = instance.localize(date, { type: 'time', format: 'short' });
+          describe('with type = "time" and format = "short"', () => {
+            it('returns the short time localization for that date', () => {
+              const result = instance.localize(date, { type: 'time', format: 'short' });
               assert.equal(result, '22:09');
             });
           });
 
-          describe('with type = "time" and format = "long"', function() {
-            it('returns the long time localization for that date', function() {
-              var result = instance.localize(date, { type: 'time', format: 'long' });
+          describe('with type = "time" and format = "long"', () => {
+            it('returns the long time localization for that date', () => {
+              const result = instance.localize(date, { type: 'time', format: 'long' });
               assert.equal(result, '22:09:04 -06:00');
             });
           });
 
-          describe('with type = "date" and format = "default"', function() {
-            it('returns the default date localization for that date', function() {
-              var result = instance.localize(date, { type: 'date', format: 'default' });
+          describe('with type = "date" and format = "default"', () => {
+            it('returns the default date localization for that date', () => {
+              const result = instance.localize(date, { type: 'date', format: 'default' });
               assert.equal(result, 'Qua, 5 de Fev de 2014');
             });
           });
 
-          describe('with type = "date" and format = "short"', function() {
-            it('returns the short date localization for that date', function() {
-              var result = instance.localize(date, { type: 'date', format: 'short' });
+          describe('with type = "date" and format = "short"', () => {
+            it('returns the short date localization for that date', () => {
+              const result = instance.localize(date, { type: 'date', format: 'short' });
               assert.equal(result, '05/02/14');
             });
           });
 
-          describe('with type = "date" and format = "long"', function() {
-            it('returns the long date localization for that date', function() {
-              var result = instance.localize(date, { type: 'date', format: 'long' });
+          describe('with type = "date" and format = "long"', () => {
+            it('returns the long date localization for that date', () => {
+              const result = instance.localize(date, { type: 'date', format: 'long' });
               assert.equal(result, 'Quarta-feira, 5 de Fevereiro de 2014');
             });
           });
 
-          describe('with unknown type and unknown format', function() {
-            it('returns a string containing "missing translation"', function() {
-              var result = instance.localize(date, { type: '__invalid__', format: '__invalid__' });
+          describe('with unknown type and unknown format', () => {
+            it('returns a string containing "missing translation"', () => {
+              const result = instance.localize(date, { type: '__invalid__', format: '__invalid__' });
               assert.matches(result, /missing translation/);
             });
           });
@@ -1359,23 +1361,23 @@ describe('translate', function() {
     });
   });
 
-  describe('#registerTranslations', function() {
-    it('is a function', function() {
+  describe('#registerTranslations', () => {
+    it('is a function', () => {
       assert.isFunction(instance.registerTranslations);
     });
 
-    it('returns the passed arguments as an object structure', function() {
-      var locale = 'foo';
-      var data   = { bar: { baz: 'bingo' } };
+    it('returns the passed arguments as an object structure', () => {
+      const locale = 'foo';
+      const data   = { bar: { baz: 'bingo' } };
 
-      var actual = instance.registerTranslations(locale, data);
+      const actual = instance.registerTranslations(locale, data);
 
-      var expected = { foo: { bar: { baz: 'bingo' }}};
+      const expected = { foo: { bar: { baz: 'bingo' }}};
 
       assert.deepEqual(actual, expected);
     });
 
-    it('merges the passed arguments correctly into the registry', function() {
+    it('merges the passed arguments correctly into the registry', () => {
       instance._registry.translations = {};
 
       instance.registerTranslations('foo', { bar: { baz: 'bingo' } });
@@ -1396,12 +1398,12 @@ describe('translate', function() {
     });
   });
 
-  describe('#registerInterpolations', function() {
-    it('is a function', function() {
+  describe('#registerInterpolations', () => {
+    it('is a function', () => {
       assert.isFunction(instance.registerInterpolations);
     });
 
-    it('merges the passed arguments correctly into the registry', function() {
+    it('merges the passed arguments correctly into the registry', () => {
       instance._registry.interpolations = {};
 
       instance.registerInterpolations({ foo: 'yes', bar: 'no' });
@@ -1415,8 +1417,8 @@ describe('translate', function() {
     });
   });
 
-  describe('explicitly checking the examples of the README', function() {
-    it('passes all tests', function() {
+  describe('explicitly checking the examples of the README', () => {
+    it('passes all tests', () => {
       translate.registerTranslations('en', {
         damals: {
           about_x_hours_ago: {
@@ -1458,10 +1460,10 @@ describe('translate', function() {
       translate.registerTranslations('de', require('./locales/de'));
       translate.registerTranslations('de', JSON.parse('{"my_project": {"greeting": "Hallo, %(name)s!","x_items": {"one": "1 Stück", "other": "%(count)s Stücke"}}}'));
 
-      assert.equal(translate.withLocale('de', function() { return translate('greeting', { scope: 'my_project', name: 'Martin' }); }), 'Hallo, Martin!');
-      assert.equal(translate.withLocale('de', function() { return translate('x_items', { scope: 'my_project', count: 1 }); }), '1 Stück');
+      assert.equal(translate.withLocale('de', () => translate('greeting', { scope: 'my_project', name: 'Martin' })), 'Hallo, Martin!');
+      assert.equal(translate.withLocale('de', () => translate('x_items', { scope: 'my_project', count: 1 })), '1 Stück');
 
-      var date = new time.Date('Fri Feb 21 2014 13:46:24 GMT+0100 (CET)');
+      const date = new time.Date('Fri Feb 21 2014 13:46:24 GMT+0100 (CET)');
       date.setTimezone('Europe/Amsterdam');
 
       assert.equal(translate.localize(date)                       , 'Fri, 21 Feb 2014 13:46');
@@ -1498,23 +1500,23 @@ describe('translate', function() {
 
 /* Helper Functions */
 
-assert.isString = function(value, message) {
-  assert.equal(Object.prototype.toString.call(value), '[object String]', message || (value + ' is not a string'));
+assert.isString = (value, message) => {
+  assert.equal(Object.prototype.toString.call(value), '[object String]', message || (`${value} is not a string`));
 };
 
-assert.isFunction = function(value, message) {
-  assert.equal(Object.prototype.toString.call(value), '[object Function]', message || (value + ' is not a function'));
+assert.isFunction = (value, message) => {
+  assert.equal(Object.prototype.toString.call(value), '[object Function]', message || (`${value} is not a function`));
 };
 
-assert.isObject = function(value, message) {
-  assert.equal(Object.prototype.toString.call(value), '[object Object]', message || (value + ' is not an object'));
+assert.isObject = (value, message) => {
+  assert.equal(Object.prototype.toString.call(value), '[object Object]', message || (`${value} is not an object`));
 };
 
-assert.isUndefined = function(value, message) {
-  assert.equal(Object.prototype.toString.call(value), '[object Undefined]', message || (value + ' is not undefined'));
+assert.isUndefined = (value, message) => {
+  assert.equal(Object.prototype.toString.call(value), '[object Undefined]', message || (`${value} is not undefined`));
 };
 
-assert.matches = function(actual, expected, message) {
+assert.matches = (actual, expected, message) => {
   if (!expected.test(actual)) {
     assert.fail(actual, expected, message, '!~');
   }
