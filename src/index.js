@@ -8,15 +8,11 @@ import strftime from './strftime';
 
 const translationScope = 'counterpart';
 
-function isString(val) {
-  return typeof val === 'string' || Object.prototype.toString.call(val) === '[object String]';
-}
+const isString = (val) => typeof val === 'string' || Object.prototype.toString.call(val) === '[object String]';
 
-function isFunction(val) {
-  return typeof val === 'function' || Object.prototype.toString.call(val) === '[object Function]';
-}
+const isFunction = (val) => typeof val === 'function' || Object.prototype.toString.call(val) === '[object Function]';
 
-function isPlainObject(val) {
+const isPlainObject = (val) => {
   //Deal with older browsers (IE8) that don't return [object Null] in this case.
   if (val === null) {
     return false;
@@ -24,23 +20,17 @@ function isPlainObject(val) {
   return Object.prototype.toString.call(val) === '[object Object]';
 }
 
-function isSymbol(key) {
-  return isString(key) && key[0] === ':';
-}
+const isSymbol = (key) => isString(key) && key[0] === ':';
 
-function hasOwnProp(obj, key) {
-  return Object.prototype.hasOwnProperty.call(obj, key);
-}
+const hasOwnProp = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
 
-function getEntry(translations, keys) {
-  return keys.reduce((result, key) => {
-    if (isPlainObject(result) && hasOwnProp(result, key)) {
-      return result[key];
-    } else {
-      return null;
-    }
-  }, translations);
-}
+const getEntry = (translations, keys) => keys.reduce((result, key) => {
+                                            if (isPlainObject(result) && hasOwnProp(result, key)) {
+                                              return result[key];
+                                            } else {
+                                              return null;
+                                            }
+                                          }, translations);
 
 class Counterpart {
   constructor() {
@@ -372,9 +362,7 @@ Counterpart.prototype.removeTranslationNotFoundListener = function(callback) {
 
 const instance = new Counterpart();
 
-function translate() {
-  return instance.translate(...arguments);
-}
+const translate = () => instance.translate(...arguments);
 
 extend(translate, instance, {
   Instance: Counterpart,
