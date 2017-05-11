@@ -1,161 +1,143 @@
-'use strict';
-
 import extend from 'extend';
-import {isArray, isDate} from 'util';
-import {sprintf} from 'sprintf-js';
-import events  from 'events';
-import except  from 'except';
-
+import {isArray} from 'util';
+import {isDate} from 'util';
+import {sprintf} from "sprintf-js";
+import events from 'events';
+import except from 'except';
 import strftime from './strftime';
 
-var translationScope = 'counterpart';
+const translationScope = 'counterpart';
 
-let _registry = {
-  locale: 'en',
-  interpolate: true,
-  fallbackLocales: [],
-  scope: null,
-  translations: {},
-  interpolations: {},
-  normalizedKeys: {},
-  separator: '.',
-  keepTrailingDot: false,
-  keyTransformer: (key) => key
-};
+function isString(val) {
+  return typeof val === 'string' || Object.prototype.toString.call(val) === '[object String]';
+}
 
-const isString = (val) => {
-  console.log(typeof val);
-  console.log(Object.prototype.toString.call(val));
-  return typeof val === 'string' || Object.prototype.toString.call(val) === '[object String]'
-};
+function isFunction(val) {
+  return typeof val === 'function' || Object.prototype.toString.call(val) === '[object Function]';
+}
 
-const isSymbol = (key) => isString(key) && key[0] === ':';
+function isPlainObject(val) {
+  //Deal with older browsers (IE8) that don't return [object Null] in this case.
+  if (val === null) {
+    return false;
+  }
+  return Object.prototype.toString.call(val) === '[object Object]';
+}
 
-const getEntry = (translations, keys) =>  keys.reduce((result, key) => {
-                                            if (isPlainObject(result) && hasOwnProp(result, key)) {
-                                              return result[key];
-                                            } else {
-                                              return null;
-                                            }
-                                          }, translations);
+function isSymbol(key) {
+  return isString(key) && key[0] === ':';
+}
 
-const isPlainObject = (val) => {
-                        //Deal with older browsers (IE8) that don't return [object Null] in this case.
-                        if (val === null) {
-                          return false;
-                        }
-                        return Object.prototype.toString.call(val) === '[object Object]';
-                      };
+function hasOwnProp(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
 
-const hasOwnProp = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
+function getEntry(translations, keys) {
+  return keys.reduce((result, key) => {
+    if (isPlainObject(result) && hasOwnProp(result, key)) {
+      return result[key];
+    } else {
+      return null;
+    }
+  }, translations);
+}
 
-export default class Counterpart extends events.EventEmitter {
+class Counterpart {
   constructor() {
-    super();
-    this.onLocaleChange = this.addLocaleChangeListener;
-    this.offLocaleChange = this.removeLocaleChangeListener;
-    this.onTranslationNotFound = this.addTranslationNotFoundListener;
-    this.offTranslationNotFound = this.removeTranslationNotFoundListener;
-    this._normalizeKeys = this._normalizeKeys.bind(this);
+    this._registry = {
+      locale: 'en',
+      interpolate: true,
+      fallbackLocales: [],
+      scope: null,
+      translations: {},
+      interpolations: {},
+      normalizedKeys: {},
+      separator: '.',
+      keepTrailingDot: false,
+      keyTransformer(key) { return key; }
+    };
+
+    this.registerTranslations('en', require('./locales/en'));
+    this.setMaxListeners(0);
   }
 
-  static isFunction(val) {
-    return typeof val === 'function' || Object.prototype.toString.call(val) === '[object Function]';
+  getLocale() {
+    return this._registry.locale;
   }
 
-  static getLocale () {
-    return _registry.locale;
-  };
-
-  static setLocale (value) {
-    var previous = _registry.locale;
+  setLocale(value) {
+    const previous = this._registry.locale;
 
     if (previous != value) {
-      _registry.locale = value;
+      this._registry.locale = value;
       this.emit('localechange', value, previous);
     }
 
     return previous;
-  };
+  }
 
-  static getFallbackLocale () {
-    return _registry.fallbackLocales;
-  };
+  getFallbackLocale() {
+    return this._registry.fallbackLocales;
+  }
 
-  static setFallbackLocale (value) {
-    var previous = _registry.fallbackLocales;
-    _registry.fallbackLocales = [].concat(value || []);
+  setFallbackLocale(value) {
+    const previous = this._registry.fallbackLocales;
+    this._registry.fallbackLocales = [].concat(value || []);
     return previous;
-  };
+  }
 
-  static getAvailableLocales () {
-    return _registry.availableLocales || Object.keys(_registry.translations);
-  };
+  getAvailableLocales() {
+    return this._registry.availableLocales || Object.keys(this._registry.translations);
+  }
 
-  static setAvailableLocales (value) {
-    var previous = this.getAvailableLocales();
-    _registry.availableLocales = value;
+  setAvailableLocales(value) {
+    const previous = this.getAvailableLocales();
+    this._registry.availableLocales = value;
     return previous;
-  };
+  }
 
-  static getSeparator () {
-    return _registry.separator;
-  };
+  getSeparator() {
+    return this._registry.separator;
+  }
 
-  static setSeparator (value) {
-    var previous = _registry.separator;
-    _registry.separator = value;
+  setSeparator(value) {
+    const previous = this._registry.separator;
+    this._registry.separator = value;
     return previous;
-  };
+  }
 
-  static setInterpolate (value) {
-    var previous = _registry.interpolate;
-    _registry.interpolate = value;
+  setInterpolate(value) {
+    const previous = this._registry.interpolate;
+    this._registry.interpolate = value;
     return previous;
-  };
+  }
 
-  static getInterpolate () {
-    return _registry.interpolate;
-  };
+  getInterpolate() {
+    return this._registry.interpolate;
+  }
 
-  static setKeyTransformer (value) {
-    var previous = _registry.keyTransformer;
-    _registry.keyTransformer = value;
+  setKeyTransformer(value) {
+    const previous = this._registry.keyTransformer;
+    this._registry.keyTransformer = value;
     return previous;
-  };
+  }
 
-  static getKeyTransformer () {
-    return _registry.keyTransformer;
-  };
+  getKeyTransformer() {
+    return this._registry.keyTransformer;
+  }
 
-  static registerTranslations (locale, data) {
-    var translations = {};
+  registerTranslations(locale, data) {
+    const translations = {};
     translations[locale] = data;
-    extend(true, _registry.translations, translations);
+    extend(true, this._registry.translations, translations);
     return translations;
-  };
+  }
 
-  static registerInterpolations (data) {
-    return extend(true, _registry.interpolations, data);
-  };
+  registerInterpolations(data) {
+    return extend(true, this._registry.interpolations, data);
+  }
 
-  static addLocaleChangeListener (callback) {
-    this.addListener('localechange', callback);
-  };
-
-  static removeLocaleChangeListener (callback) {
-    this.removeListener('localechange', callback);
-  };
-
-  static addTranslationNotFoundListener (callback) {
-    this.addListener('translationnotfound', callback);
-  };
-
-  static removeTranslationNotFoundListener (callback) {
-    this.removeListener('translationnotfound', callback);
-  };
-
-  static translate (key, options) {
+  translate(key, options) {
     if (!isArray(key) && !isString(key) || !key.length) {
       throw new Error('invalid argument: key');
     }
@@ -164,36 +146,36 @@ export default class Counterpart extends events.EventEmitter {
       key = key.substr(1);
     }
 
-    key = _registry.keyTransformer(key, options);
+    key = this._registry.keyTransformer(key, options);
 
     options = extend(true, {}, options);
 
-    var locale = options.locale || _registry.locale;
+    let locale = options.locale || this._registry.locale;
     delete options.locale;
 
-    var scope = options.scope || _registry.scope;
+    const scope = options.scope || this._registry.scope;
     delete options.scope;
 
-    var separator = options.separator || _registry.separator;
+    const separator = options.separator || this._registry.separator;
     delete options.separator;
 
-    var fallbackLocales = [].concat(options.fallbackLocale || _registry.fallbackLocales);
+    const fallbackLocales = [].concat(options.fallbackLocale || this._registry.fallbackLocales);
     delete options.fallbackLocale;
 
     const keys = this._normalizeKeys(locale, scope, key, separator);
 
-    var entry = getEntry(_registry.translations, keys);
+    let entry = getEntry(this._registry.translations, keys);
 
     if (entry === null && options.fallback) {
       this.emit('translationnotfound', locale, key, options.fallback, scope);
       entry = this._fallback(locale, scope, key, options.fallback, options);
     }
 
-    if (entry === null && fallbackLocales.length > 0 && fallbackLocales.indexOf(locale) === -1) {
-      for (var ix in fallbackLocales) {
-        var fallbackLocale = fallbackLocales[ix];
-        var fallbackKeys = this._normalizeKeys(fallbackLocale, scope, key, separator);
-        entry = getEntry(_registry.translations, fallbackKeys);
+    if (entry === null && fallbackLocales.length > 0 && !fallbackLocales.includes(locale)) {
+      for (const ix in fallbackLocales) {
+        const fallbackLocale = fallbackLocales[ix];
+        const fallbackKeys = this._normalizeKeys(fallbackLocale, scope, key, separator);
+        entry = getEntry(this._registry.translations, fallbackKeys);
 
         if (entry) {
           locale = fallbackLocale;
@@ -203,136 +185,134 @@ export default class Counterpart extends events.EventEmitter {
     }
 
     if (entry === null) {
-      entry = 'missing translation: ' + keys.join(separator);
+      entry = `missing translation: ${keys.join(separator)}`;
     }
 
     entry = this._pluralize(locale, entry, options.count);
 
-    if (_registry.interpolate !== false && options.interpolate !== false) {
+    if (this._registry.interpolate !== false && options.interpolate !== false) {
       entry = this._interpolate(entry, options);
     }
 
     return entry;
-  };
+  }
 
-  static localize (object, options) {
+  localize(object, options) {
     if (!isDate(object)) {
       throw new Error('invalid argument: object must be a date');
     }
 
     options = extend(true, {}, options);
 
-    var locale  = options.locale  || _registry.locale;
-    var scope   = options.scope   || translationScope;
-    var type    = options.type    || 'datetime';
-    var format  = options.format  || 'default';
+    const locale  = options.locale  || this._registry.locale;
+    const scope   = options.scope   || translationScope;
+    const type    = options.type    || 'datetime';
+    let format  = options.format  || 'default';
 
-    options = { locale: locale, scope: scope, interpolate: false };
+    options = { locale, scope, interpolate: false };
     format  = this.translate(['formats', type, format], extend(true, {}, options));
 
     return strftime(object, format, this.translate('names', options));
-  };
+  }
 
-  static _pluralize (locale, entry, count) {
+  _pluralize(locale, entry, count) {
     if (typeof entry !== 'object' || entry === null || typeof count !== 'number') {
       return entry;
     }
 
-    var pluralizeFunc = this.translate('pluralize', { locale: locale, scope: translationScope });
+    const pluralizeFunc = this.translate('pluralize', { locale, scope: translationScope });
 
     if (Object.prototype.toString.call(pluralizeFunc) !== '[object Function]') {
       return pluralizeFunc;
     }
 
     return pluralizeFunc(entry, count);
-  };
+  }
 
-  static withLocale (locale, callback, context) {
-    var previous = _registry.locale;
-    _registry.locale = locale;
-    var result = callback.call(context);
-    _registry.locale = previous;
+  withLocale(locale, callback, context) {
+    const previous = this._registry.locale;
+    this._registry.locale = locale;
+    const result = callback.call(context);
+    this._registry.locale = previous;
     return result;
-  };
+  }
 
-  static withScope (scope, callback, context) {
-    var previous = _registry.scope;
-    _registry.scope = scope;
-    var result = callback.call(context);
-    _registry.scope = previous;
+  withScope(scope, callback, context) {
+    const previous = this._registry.scope;
+    this._registry.scope = scope;
+    const result = callback.call(context);
+    this._registry.scope = previous;
     return result;
-  };
+  }
 
-  static withSeparator (separator, callback, context) {
-    var previous = this.setSeparator(separator);
-    var result = callback.call(context);
+  withSeparator(separator, callback, context) {
+    const previous = this.setSeparator(separator);
+    const result = callback.call(context);
     this.setSeparator(previous);
     return result;
-  };
+  }
 
-  _normalizeKeys (locale, scope, key, separator) {
-    var keys = [];
+  _normalizeKeys(locale, scope, key, separator) {
+    let keys = [];
 
     keys = keys.concat(this._normalizeKey(locale, separator));
     keys = keys.concat(this._normalizeKey(scope, separator));
     keys = keys.concat(this._normalizeKey(key, separator));
 
     return keys;
-  };
+  }
 
-  static _normalizeKey (key, separator) {
-    _registry.normalizedKeys[separator] = _registry.normalizedKeys[separator] || {};
+  _normalizeKey(key, separator) {
+    this._registry.normalizedKeys[separator] = this._registry.normalizedKeys[separator] || {};
 
-    _registry.normalizedKeys[separator][key] = _registry.normalizedKeys[separator][key] || (function(key) {
+    this._registry.normalizedKeys[separator][key] = this._registry.normalizedKeys[separator][key] || ((key => {
       if (isArray(key)) {
-        var normalizedKeyArray = key.map(function(k) { return this._normalizeKey(k, separator); }.bind(this));
+        const normalizedKeyArray = key.map(k => this._normalizeKey(k, separator));
 
-        return [].concat.apply([], normalizedKeyArray);
+        return [].concat(...normalizedKeyArray);
       } else {
         if (typeof key === 'undefined' || key === null) {
           return [];
         }
 
-        var keys = key.split(separator);
+        const keys = key.split(separator);
 
-        for (var i = keys.length - 1; i >= 0; i--) {
+        for (let i = keys.length - 1; i >= 0; i--) {
           if (keys[i] === '') {
             keys.splice(i, 1);
 
-            if (_registry.keepTrailingDot === true && i == keys.length) {
-              keys[keys.length - 1] += '' + separator;
+            if (this._registry.keepTrailingDot === true && i == keys.length) {
+              keys[keys.length - 1] += `${separator}`;
             }
           }
         }
 
         return keys;
       }
-    }.bind(this))(key);
+    }))(key);
 
-    return _registry.normalizedKeys[separator][key];
-  };
+    return this._registry.normalizedKeys[separator][key];
+  }
 
-  static _interpolate (entry, values) {
+  _interpolate(entry, values) {
     if (typeof entry !== 'string') {
       return entry;
     }
 
-    return sprintf(entry, extend({}, _registry.interpolations, values));
-  };
+    return sprintf(entry, extend({}, this._registry.interpolations, values));
+  }
 
-  static _resolve (locale, scope, object, subject, options) {
-    options = options || {};
-
+  _resolve(locale, scope, object, subject, options={}) {
     if (options.resolve === false) {
       return subject;
     }
 
-    var result;
+    let result;
 
     if (isSymbol(subject)) {
-      result = this.translate(subject, extend({}, options, { locale: locale, scope: scope }));
+      result = this.translate(subject, extend({}, options, { locale, scope }));
     } else if (isFunction(subject)) {
-      var dateOrTime;
+      let dateOrTime;
 
       if (options.object) {
         dateOrTime = options.object;
@@ -347,14 +327,14 @@ export default class Counterpart extends events.EventEmitter {
     }
 
     return /^missing translation:/.test(result) ? null : result;
-  };
+  }
 
-  static _fallback (locale, scope, object, subject, options) {
+  _fallback(locale, scope, object, subject, options) {
     options = except(options, 'fallback');
 
     if (isArray(subject)) {
-      for (var i = 0, ii = subject.length; i < ii; i++) {
-        var result = this._resolve(locale, scope, object, subject[i], options);
+      for (let i = 0, ii = subject.length; i < ii; i++) {
+        const result = this._resolve(locale, scope, object, subject[i], options);
 
         if (result) {
           return result;
@@ -365,6 +345,40 @@ export default class Counterpart extends events.EventEmitter {
     } else {
       return this._resolve(locale, scope, object, subject, options);
     }
-  };
-
+  }
 }
+
+extend(Counterpart.prototype, events.EventEmitter.prototype);
+
+Counterpart.prototype.onLocaleChange =
+Counterpart.prototype.addLocaleChangeListener = function(callback) {
+  this.addListener('localechange', callback);
+};
+
+Counterpart.prototype.offLocaleChange =
+Counterpart.prototype.removeLocaleChangeListener = function(callback) {
+  this.removeListener('localechange', callback);
+};
+
+Counterpart.prototype.onTranslationNotFound =
+Counterpart.prototype.addTranslationNotFoundListener = function(callback) {
+  this.addListener('translationnotfound', callback);
+};
+
+Counterpart.prototype.offTranslationNotFound =
+Counterpart.prototype.removeTranslationNotFoundListener = function(callback) {
+  this.removeListener('translationnotfound', callback);
+};
+
+const instance = new Counterpart();
+
+function translate() {
+  return instance.translate(...arguments);
+}
+
+extend(translate, instance, {
+  Instance: Counterpart,
+  Translator: Counterpart
+});
+
+export default translate;
