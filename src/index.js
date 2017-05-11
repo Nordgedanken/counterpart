@@ -374,4 +374,6 @@ extend(Counterpart_var.translate, instance, {
   Translator: Counterpart
 });
 
-export default Counterpart_var;
+export default Counterpart_var
+const translate_var = Counterpart_var.translate;
+export {translate_var}
