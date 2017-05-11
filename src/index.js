@@ -47,7 +47,7 @@ class Counterpart {
       keyTransformer(key) { return key; }
     };
 
-    this.registerTranslations('en', require('../locales/en'));
+    this.registerTranslationsIntern('en', require('../locales/en'));
     this.setMaxListeners(0);
   }
 
@@ -116,7 +116,7 @@ class Counterpart {
     return this._registry.keyTransformer;
   }
 
-  registerTranslations(locale, data) {
+  registerTranslationsIntern(locale, data) {
     const translations = {};
     translations[locale] = data;
     extend(true, this._registry.translations, translations);
@@ -362,8 +362,8 @@ Counterpart.prototype.removeTranslationNotFoundListener = (callback) => {
                                                             instance.removeListener('translationnotfound', callback);
                                                           };
 
-Counterpart.prototype.registerTranslations = (locale, data) => {
-                                                return instance.registerTranslations(locale, data);
+const registerTranslations = (locale, data) => {
+                                                return instance.registerTranslationsIntern(locale, data);
                                               };
 
 function translate(key) { return instance.translateIntern(key); };
@@ -374,3 +374,4 @@ extend(translate, instance, {
 });
 
 export default translate;
+export {registerTranslations}
