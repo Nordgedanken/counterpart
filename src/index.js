@@ -55,7 +55,7 @@ class Counterpart {
     return this._registry.locale;
   }
 
-  setLocale(value) {
+  setLocaleIntern(value) {
     const previous = this._registry.locale;
 
     if (previous != value) {
@@ -70,7 +70,7 @@ class Counterpart {
     return this._registry.fallbackLocales;
   }
 
-  setFallbackLocale(value) {
+  setFallbackLocaleIntern(value) {
     const previous = this._registry.fallbackLocales;
     this._registry.fallbackLocales = [].concat(value || []);
     return previous;
@@ -362,8 +362,9 @@ Counterpart.prototype.removeTranslationNotFoundListener = (callback) => {
                                                             instance.removeListener('translationnotfound', callback);
                                                           };
 const registerTranslations = (locale, data) => instance.registerTranslationsIntern(locale, data);
-
-const translate = (key) => instance.translateIntern(key);
+const translate = (key, options) => instance.translateIntern(key, options);
+const setLocale = (value) => instance.setLocaleIntern(value);
+const setFallbackLocale  = (value) => instance.setFallbackLocaleIntern(value);
 
 extend(translate, instance, {
   Instance: Counterpart,
@@ -372,4 +373,4 @@ extend(translate, instance, {
 
 export default translate
 const counterpart = new Counterpart;
-export {counterpart , translate, registerTranslations}
+export {counterpart, translate, registerTranslations, setLocale, setFallbackLocale}
