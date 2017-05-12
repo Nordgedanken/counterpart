@@ -32,8 +32,9 @@ const getEntry = (translations, keys) => keys.reduce((result, key) => {
                                             }
                                           }, translations);
 
-class Counterpart {
+class Counterpart extends events.EventEmitter {
   constructor() {
+    super();
     this._registry = {
       locale: 'en',
       interpolate: true,
@@ -60,7 +61,7 @@ class Counterpart {
 
     if (previous != value) {
       this._registry.locale = value;
-      events.EventEmitter.emit('localechange', value, previous);
+      this.emit('localechange', value, previous);
     }
 
     return previous;
@@ -157,7 +158,7 @@ class Counterpart {
     let entry = getEntry(this._registry.translations, keys);
 
     if (entry === null && options.fallback) {
-      events.EventEmitter.emit('translationnotfound', locale, key, options.fallback, scope);
+      this.emit('translationnotfound', locale, key, options.fallback, scope);
       entry = this._fallback(locale, scope, key, options.fallback, options);
     }
 
