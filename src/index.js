@@ -52,7 +52,7 @@ class Counterpart extends events.EventEmitter {
     this.setMaxListeners(0);
   }
 
-  getLocale() {
+  getLocaleIntern() {
     return this._registry.locale;
   }
 
@@ -107,7 +107,7 @@ class Counterpart extends events.EventEmitter {
     return this._registry.interpolate;
   }
 
-  setKeyTransformer(value) {
+  setKeyTransformerIntern(value) {
     const previous = this._registry.keyTransformer;
     this._registry.keyTransformer = value;
     return previous;
@@ -124,7 +124,7 @@ class Counterpart extends events.EventEmitter {
     return translations;
   }
 
-  registerInterpolations(data) {
+  registerInterpolationsIntern(data) {
     return extend(true, this._registry.interpolations, data);
   }
 
@@ -189,7 +189,7 @@ class Counterpart extends events.EventEmitter {
     return entry;
   }
 
-  localize(object, options) {
+  localizeIntern(object, options) {
     if (!isDate(object)) {
       throw new Error('invalid argument: object must be a date');
     }
@@ -221,7 +221,7 @@ class Counterpart extends events.EventEmitter {
     return pluralizeFunc(entry, count);
   }
 
-  withLocale(locale, callback, context) {
+  withLocaleIntern(locale, callback, context) {
     const previous = this._registry.locale;
     this._registry.locale = locale;
     const result = callback.call(context);
@@ -366,6 +366,11 @@ const translate = (key, options) => instance.translateIntern(key, options);
 const setLocale = (value) => instance.setLocaleIntern(value);
 const setFallbackLocale  = (value) => instance.setFallbackLocaleIntern(value);
 const setSeparator = (value) => instance.setSeparatorIntern(value);
+const getLocale = () => instance.getLocaleIntern();
+const withLocale = (locale, callback, context) => instance.withLocaleIntern(locale, callback, context);
+const registerInterpolations = () => instance.registerInterpolationsIntern();
+const setKeyTransformer = () => instance.setKeyTransformerIntern();
+const localize = () => instance.localizeIntern();
 
 extend(translate, instance, {
   Instance: Counterpart,
@@ -373,5 +378,5 @@ extend(translate, instance, {
 });
 
 export default translate
-const counterpart = new Counterpart;
-export {counterpart, translate, registerTranslations, setLocale, setFallbackLocale}
+const counterpart = Counterpart;
+export {counterpart, translate, registerTranslations, setLocale, setFallbackLocale, setSeparator, getLocale, withLocale, registerInterpolations, setKeyTransformer, localize}
