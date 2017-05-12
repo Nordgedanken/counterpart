@@ -12,25 +12,14 @@ const isString = (val) => typeof val === 'string' || Object.prototype.toString.c
 
 const isFunction = (val) => typeof val === 'function' || Object.prototype.toString.call(val) === '[object Function]';
 
-const isPlainObject = (val) => {
-  //Deal with older browsers (IE8) that don't return [object Null] in this case.
-  if (val === null) {
-    return false;
-  }
-  return Object.prototype.toString.call(val) === '[object Object]';
-}
+//Deal with older browsers (IE8) that don't return [object Null] in this case.
+const isPlainObject = (val) => (val === null) ? false : Object.prototype.toString.call(val) === '[object Object]';
 
 const isSymbol = (key) => isString(key) && key[0] === ':';
 
 const hasOwnProp = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
 
-const getEntry = (translations, keys) => keys.reduce((result, key) => {
-                                            if (isPlainObject(result) && hasOwnProp(result, key)) {
-                                              return result[key];
-                                            } else {
-                                              return null;
-                                            }
-                                          }, translations);
+const getEntry = (translations, keys) => keys.reduce((result, key) => isPlainObject(result) && hasOwnProp(result, key) ? result[key] : null, translations);
 
 class Counterpart extends events.EventEmitter {
   constructor() {
@@ -45,18 +34,16 @@ class Counterpart extends events.EventEmitter {
       normalizedKeys: {},
       separator: '.',
       keepTrailingDot: false,
-      keyTransformer(key) { return key; }
+      keyTransformer(key) { return key; },
     };
 
     this.registerTranslationsIntern('en', require('../locales/en'));
     this.setMaxListeners(0);
   }
 
-  getLocaleIntern() {
-    return this._registry.locale;
-  }
+  getLocaleIntern = () => this._registry.locale;
 
-  setLocaleIntern(value) {
+  setLocaleIntern = (value) => {
     const previous = this._registry.locale;
 
     if (previous != value) {
@@ -67,68 +54,58 @@ class Counterpart extends events.EventEmitter {
     return previous;
   }
 
-  getFallbackLocale() {
+  getFallbackLocale = () => {
     return this._registry.fallbackLocales;
   }
 
-  setFallbackLocaleIntern(value) {
+  setFallbackLocaleIntern = value => {
     const previous = this._registry.fallbackLocales;
     this._registry.fallbackLocales = [].concat(value || []);
     return previous;
   }
 
-  getAvailableLocales() {
-    return this._registry.availableLocales || Object.keys(this._registry.translations);
-  }
+  getAvailableLocale = () => this._registry.availableLocales || Object.keys(this._registry.translations);
 
-  setAvailableLocales(value) {
+  setAvailableLocales = value => {
     const previous = this.getAvailableLocales();
     this._registry.availableLocales = value;
     return previous;
   }
 
-  getSeparator() {
-    return this._registry.separator;
-  }
+  getSeparator = () => this._registry.separator;
 
-  setSeparatorIntern(value) {
+  setSeparatorIntern = value => {
     const previous = this._registry.separator;
     this._registry.separator = value;
     return previous;
   }
 
-  setInterpolate(value) {
+  setInterpolate = value => {
     const previous = this._registry.interpolate;
     this._registry.interpolate = value;
     return previous;
   }
 
-  getInterpolate() {
-    return this._registry.interpolate;
-  }
+  getInterpolate = () => this._registry.interpolate;
 
-  setKeyTransformerIntern(value) {
+  setKeyTransformerIntern = value => {
     const previous = this._registry.keyTransformer;
     this._registry.keyTransformer = value;
     return previous;
   }
 
-  getKeyTransformer() {
-    return this._registry.keyTransformer;
-  }
+  getKeyTransformer = () => this._registry.keyTransformer;
 
-  registerTranslationsIntern(locale, data) {
+  registerTranslationsIntern = (locale, data) => {
     const translations = {};
     translations[locale] = data;
     extend(true, this._registry.translations, translations);
     return translations;
   }
 
-  registerInterpolationsIntern(data) {
-    return extend(true, this._registry.interpolations, data);
-  }
+  registerInterpolationsIntern = data => extend(true, this._registry.interpolations, data);
 
-  translateIntern(key, options) {
+  translateIntern = (key, options) => {
     if (!isArray(key) && !isString(key) || !key.length) {
       throw new Error('invalid argument: key');
     }
@@ -189,7 +166,7 @@ class Counterpart extends events.EventEmitter {
     return entry;
   }
 
-  localizeIntern(object, options) {
+  localizeIntern = (object, options) => {
     if (!isDate(object)) {
       throw new Error('invalid argument: object must be a date');
     }
@@ -207,7 +184,7 @@ class Counterpart extends events.EventEmitter {
     return strftime(object, format, this.translateIntern('names', options));
   }
 
-  _pluralize(locale, entry, count) {
+  _pluralize = (locale, entry, count) => {
     if (typeof entry !== 'object' || entry === null || typeof count !== 'number') {
       return entry;
     }
@@ -221,7 +198,7 @@ class Counterpart extends events.EventEmitter {
     return pluralizeFunc(entry, count);
   }
 
-  withLocaleIntern(locale, callback, context) {
+  withLocaleIntern = (locale, callback, context) => {
     const previous = this._registry.locale;
     this._registry.locale = locale;
     const result = callback.call(context);
@@ -229,7 +206,7 @@ class Counterpart extends events.EventEmitter {
     return result;
   }
 
-  withScope(scope, callback, context) {
+  withScope = (scope, callback, context) => {
     const previous = this._registry.scope;
     this._registry.scope = scope;
     const result = callback.call(context);
@@ -237,14 +214,14 @@ class Counterpart extends events.EventEmitter {
     return result;
   }
 
-  withSeparator(separator, callback, context) {
+  withSeparator = (separator, callback, context) => {
     const previous = this.setSeparatorIntern(separator);
     const result = callback.call(context);
     this.setSeparatorIntern(previous);
     return result;
   }
 
-  _normalizeKeys(locale, scope, key, separator) {
+  _normalizeKeys = (locale, scope, key, separator) => {
     let keys = [];
 
     keys = keys.concat(this._normalizeKey(locale, separator));
@@ -254,7 +231,7 @@ class Counterpart extends events.EventEmitter {
     return keys;
   }
 
-  _normalizeKey(key, separator) {
+  _normalizeKey = (key, separator) => {
     this._registry.normalizedKeys[separator] = this._registry.normalizedKeys[separator] || {};
 
     this._registry.normalizedKeys[separator][key] = this._registry.normalizedKeys[separator][key] || ((key => {
@@ -286,15 +263,9 @@ class Counterpart extends events.EventEmitter {
     return this._registry.normalizedKeys[separator][key];
   }
 
-  _interpolate(entry, values) {
-    if (typeof entry !== 'string') {
-      return entry;
-    }
+  _interpolate = (entry, values) => (typeof entry !== 'string') ? entry : sprintf(entry, extend({}, this._registry.interpolations, values));
 
-    return sprintf(entry, extend({}, this._registry.interpolations, values));
-  }
-
-  _resolve(locale, scope, object, subject, options={}) {
+  _resolve = (locale, scope, object, subject, options={}) => {
     if (options.resolve === false) {
       return subject;
     }
@@ -321,7 +292,7 @@ class Counterpart extends events.EventEmitter {
     return /^missing translation:/.test(result) ? null : result;
   }
 
-  _fallback(locale, scope, object, subject, options) {
+  _fallback = (locale, scope, object, subject, options) => {
     options = except(options, 'fallback');
 
     if (isArray(subject)) {
