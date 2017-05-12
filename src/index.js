@@ -377,5 +377,5 @@ extend(translate, instance, {
 });
 
 export default translate
-const counterpart = new Counterpart;
+const counterpart = Counterpart;
 export {counterpart, translate, registerTranslations, setLocale, setFallbackLocale, setSeparator, getLocale, withLocale, registerInterpolations, setKeyTransformer, localize}
