@@ -8,14 +8,14 @@ import strftime from './strftime';
 
 const translationScope = 'counterpart';
 
-const isString = (val) => typeof val === 'string' || Object.prototype.toString.call(val) === '[object String]';
+const isString = val => typeof val === 'string' || Object.prototype.toString.call(val) === '[object String]';
 
-const isFunction = (val) => typeof val === 'function' || Object.prototype.toString.call(val) === '[object Function]';
+const isFunction = val => typeof val === 'function' || Object.prototype.toString.call(val) === '[object Function]';
 
 //Deal with older browsers (IE8) that don't return [object Null] in this case.
-const isPlainObject = (val) => (val === null) ? false : Object.prototype.toString.call(val) === '[object Object]';
+const isPlainObject = val => (val === null) ? false : Object.prototype.toString.call(val) === '[object Object]';
 
-const isSymbol = (key) => isString(key) && key[0] === ':';
+const isSymbol = key => isString(key) && key[0] === ':';
 
 const hasOwnProp = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
 
@@ -43,7 +43,7 @@ class Counterpart extends events.EventEmitter {
 
   getLocaleIntern = () => this._registry.locale;
 
-  setLocaleIntern = (value) => {
+  setLocaleIntern = value => {
     const previous = this._registry.locale;
 
     if (previous != value) {
@@ -314,29 +314,29 @@ class Counterpart extends events.EventEmitter {
 const instance = new Counterpart();
 
 Counterpart.prototype.onLocaleChange =
-Counterpart.prototype.addLocaleChangeListener = (callback) => {
+Counterpart.prototype.addLocaleChangeListener = callback => {
                                                   events.EventEmitter.addListener('localechange', callback);
                                                 };
 
 Counterpart.prototype.offLocaleChange =
-Counterpart.prototype.removeLocaleChangeListener = (callback) => {
+Counterpart.prototype.removeLocaleChangeListener = callback => {
                                                       events.EventEmitter.removeListener('localechange', callback);
                                                     };
 
 Counterpart.prototype.onTranslationNotFound =
-Counterpart.prototype.addTranslationNotFoundListener = (callback) => {
+Counterpart.prototype.addTranslationNotFoundListener = callback => {
                                                           events.EventEmitter.addListener('translationnotfound', callback);
                                                         };
 
 Counterpart.prototype.offTranslationNotFound =
-Counterpart.prototype.removeTranslationNotFoundListener = (callback) => {
+Counterpart.prototype.removeTranslationNotFoundListener = callback => {
                                                             events.EventEmitter.removeListener('translationnotfound', callback);
                                                           };
 const registerTranslations = (locale, data) => instance.registerTranslationsIntern(locale, data);
 const translate = (key, options) => instance.translateIntern(key, options);
-const setLocale = (value) => instance.setLocaleIntern(value);
-const setFallbackLocale  = (value) => instance.setFallbackLocaleIntern(value);
-const setSeparator = (value) => instance.setSeparatorIntern(value);
+const setLocale = value => instance.setLocaleIntern(value);
+const setFallbackLocale  = value => instance.setFallbackLocaleIntern(value);
+const setSeparator = value => instance.setSeparatorIntern(value);
 const getLocale = () => instance.getLocaleIntern();
 const withLocale = (locale, callback, context) => instance.withLocaleIntern(locale, callback, context);
 const registerInterpolations = () => instance.registerInterpolationsIntern();
