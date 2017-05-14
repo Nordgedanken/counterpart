@@ -32,7 +32,7 @@ class Counterpart extends events.EventEmitter {
       translations: {},
       interpolations: {},
       normalizedKeys: {},
-      separator: '°°',
+      separator: '|',
       keepTrailingDot: false,
       keyTransformer(key) { return key; },
     };
