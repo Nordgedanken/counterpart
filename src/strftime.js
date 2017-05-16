@@ -1,14 +1,12 @@
-'use strict';
-
-var dateNames = require('date-names');
+import dateNames from 'date-names';
 
 function strftime(date, format, names) {
-  var timestamp = date.getTime();
+  const timestamp = date.getTime();
 
   names = names || dateNames;
 
-  return format.replace(/%([-_0]?.)/g, function(_, c) {
-    var padding = null;
+  return format.replace(/%([-_0]?.)/g, (_, c) => {
+    let padding = null;
 
     if (c.length == 2) {
       switch (c[0]) {
@@ -56,9 +54,9 @@ function strftime(date, format, names) {
       case 'W': return pad(weekNumber(date, 'monday'), padding);
       case 'w': return date.getDay();
       case 'Y': return date.getFullYear();
-      case 'y': var y = String(date.getFullYear()); return y.slice(y.length - 2);
-      case 'Z': var tzString = date.toString().match(/\((\w+)\)/); return tzString && tzString[1] || '';
-      case 'z': var off = date.getTimezoneOffset(); return (off > 0 ? '-' : '+') + pad(Math.round(Math.abs(off / 60)), 2) + ':' + pad(off % 60, 2);
+      case 'y': const y = String(date.getFullYear()); return y.slice(y.length - 2);
+      case 'Z': const tzString = date.toString().match(/\((\w+)\)/); return tzString && tzString[1] || '';
+      case 'z': const off = date.getTimezoneOffset(); return `${(off > 0 ? '-' : '+') + pad(Math.round(Math.abs(off / 60)), 2)}:${pad(off % 60, 2)}`;
       default: return c;
     }
   });
@@ -76,7 +74,7 @@ function pad(n, padding, length) {
 
   length = length || 2;
 
-  var s = String(n);
+  let s = String(n);
 
   if (padding) {
     while (s.length < length) {
@@ -88,7 +86,7 @@ function pad(n, padding, length) {
 }
 
 function hours12(date) {
-  var hour = date.getHours();
+  let hour = date.getHours();
 
   if (hour === 0) {
     hour = 12;
@@ -100,7 +98,8 @@ function hours12(date) {
 }
 
 function ordinal(n) {
-  var i = n % 10, ii = n % 100;
+  const i = n % 10;
+  const ii = n % 100;
 
   if ((ii >= 11 && ii <= 13) || i === 0 || i >= 4) {
     return 'th';
@@ -113,10 +112,8 @@ function ordinal(n) {
   }
 }
 
-function weekNumber(date, firstWeekday) {
-  firstWeekday = firstWeekday || 'sunday';
-
-  var wday = date.getDay();
+function weekNumber(date, firstWeekday='sunday') {
+  let wday = date.getDay();
 
   if (firstWeekday == 'monday') {
     if (wday === 0) { // Sunday
@@ -126,12 +123,11 @@ function weekNumber(date, firstWeekday) {
     }
   }
 
-  var
-    firstDayOfYear = new Date(date.getFullYear(), 0, 1),
-    yday = (date - firstDayOfYear) / 86400000,
-    weekNum = (yday + 7 - wday) / 7;
+  const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+  const yday = (date - firstDayOfYear) / 86400000;
+  const weekNum = (yday + 7 - wday) / 7;
 
   return Math.floor(weekNum);
 }
 
-module.exports = strftime;
+export default strftime;

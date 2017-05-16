@@ -1,387 +1,365 @@
-'use strict';
+import extend from 'extend';
+import {isArray} from 'util';
+import {isDate} from 'util';
+import {sprintf} from "sprintf-js";
+import events from 'events';
+import except from 'except';
+import strftime from './strftime';
 
-var extend  = require('extend');
-var isArray = require('util').isArray;
-var isDate  = require('util').isDate;
-var sprintf = require("sprintf-js").sprintf;
-var events  = require('events');
-var except  = require('except');
+const translationScope = 'counterpart';
 
-var strftime = require('./strftime');
+const isString = val => typeof val === 'string' || Object.prototype.toString.call(val) === '[object String]';
 
-var translationScope = 'counterpart';
+const isFunction = val => typeof val === 'function' || Object.prototype.toString.call(val) === '[object Function]';
 
-function isString(val) {
-  return typeof val === 'string' || Object.prototype.toString.call(val) === '[object String]';
-}
+//Deal with older browsers (IE8) that don't return [object Null] in this case.
+const isPlainObject = val => (val === null) ? false : Object.prototype.toString.call(val) === '[object Object]';
 
-function isFunction(val) {
-  return typeof val === 'function' || Object.prototype.toString.call(val) === '[object Function]';
-}
+const isSymbol = key => isString(key) && key[0] === ':';
 
-function isPlainObject(val) {
-  //Deal with older browsers (IE8) that don't return [object Null] in this case.
-  if (val === null) {
-    return false;
+const hasOwnProp = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
+
+const getEntry = (translations, keys) => keys.reduce((result, key) => isPlainObject(result) && hasOwnProp(result, key) ? result[key] : null, translations);
+
+class Counterpart extends events.EventEmitter {
+  constructor() {
+    super();
+    this._registry = {
+      locale: 'en',
+      interpolate: true,
+      fallbackLocales: [],
+      scope: null,
+      translations: {},
+      interpolations: {},
+      normalizedKeys: {},
+      separator: '|',
+      keepTrailingDot: false,
+      keyTransformer(key) { return key; },
+    };
+
+    this.registerTranslationsIntern('en', require('../locales/en'));
+    this.setMaxListeners(0);
   }
-  return Object.prototype.toString.call(val) === '[object Object]';
-}
 
-function isSymbol(key) {
-  return isString(key) && key[0] === ':';
-}
+  getLocaleIntern = () => this._registry.locale;
 
-function hasOwnProp(obj, key) {
-  return Object.prototype.hasOwnProperty.call(obj, key);
-}
+  setLocaleIntern = value => {
+    const previous = this._registry.locale;
 
-function getEntry(translations, keys) {
-  return keys.reduce(function(result, key) {
-    if (isPlainObject(result) && hasOwnProp(result, key)) {
-      return result[key];
-    } else {
-      return null;
+    if (previous != value) {
+      this._registry.locale = value;
+      this.emit('localechange', value, previous);
     }
-  }, translations);
-}
 
-function Counterpart() {
-  this._registry = {
-    locale: 'en',
-    interpolate: true,
-    fallbackLocales: [],
-    scope: null,
-    translations: {},
-    interpolations: {},
-    normalizedKeys: {},
-    separator: '.',
-    keepTrailingDot: false,
-    keyTransformer: function(key) { return key; }
-  };
-
-  this.registerTranslations('en', require('./locales/en'));
-  this.setMaxListeners(0);
-}
-
-extend(Counterpart.prototype, events.EventEmitter.prototype);
-
-Counterpart.prototype.getLocale = function() {
-  return this._registry.locale;
-};
-
-Counterpart.prototype.setLocale = function(value) {
-  var previous = this._registry.locale;
-
-  if (previous != value) {
-    this._registry.locale = value;
-    this.emit('localechange', value, previous);
+    return previous;
   }
 
-  return previous;
-};
-
-Counterpart.prototype.getFallbackLocale = function() {
-  return this._registry.fallbackLocales;
-};
-
-Counterpart.prototype.setFallbackLocale = function(value) {
-  var previous = this._registry.fallbackLocales;
-  this._registry.fallbackLocales = [].concat(value || []);
-  return previous;
-};
-
-Counterpart.prototype.getAvailableLocales = function() {
-  return this._registry.availableLocales || Object.keys(this._registry.translations);
-};
-
-Counterpart.prototype.setAvailableLocales = function(value) {
-  var previous = this.getAvailableLocales();
-  this._registry.availableLocales = value;
-  return previous;
-};
-
-Counterpart.prototype.getSeparator = function() {
-  return this._registry.separator;
-};
-
-Counterpart.prototype.setSeparator = function(value) {
-  var previous = this._registry.separator;
-  this._registry.separator = value;
-  return previous;
-};
-
-Counterpart.prototype.setInterpolate = function(value) {
-  var previous = this._registry.interpolate;
-  this._registry.interpolate = value;
-  return previous;
-};
-
-Counterpart.prototype.getInterpolate = function() {
-  return this._registry.interpolate;
-};
-
-Counterpart.prototype.setKeyTransformer = function(value) {
-  var previous = this._registry.keyTransformer;
-  this._registry.keyTransformer = value;
-  return previous;
-};
-
-Counterpart.prototype.getKeyTransformer = function() {
-  return this._registry.keyTransformer;
-};
-
-Counterpart.prototype.registerTranslations = function(locale, data) {
-  var translations = {};
-  translations[locale] = data;
-  extend(true, this._registry.translations, translations);
-  return translations;
-};
-
-Counterpart.prototype.registerInterpolations = function(data) {
-  return extend(true, this._registry.interpolations, data);
-};
-
-Counterpart.prototype.onLocaleChange =
-Counterpart.prototype.addLocaleChangeListener = function(callback) {
-  this.addListener('localechange', callback);
-};
-
-Counterpart.prototype.offLocaleChange =
-Counterpart.prototype.removeLocaleChangeListener = function(callback) {
-  this.removeListener('localechange', callback);
-};
-
-Counterpart.prototype.onTranslationNotFound =
-Counterpart.prototype.addTranslationNotFoundListener = function(callback) {
-  this.addListener('translationnotfound', callback);
-};
-
-Counterpart.prototype.offTranslationNotFound =
-Counterpart.prototype.removeTranslationNotFoundListener = function(callback) {
-  this.removeListener('translationnotfound', callback);
-};
-
-Counterpart.prototype.translate = function(key, options) {
-  if (!isArray(key) && !isString(key) || !key.length) {
-    throw new Error('invalid argument: key');
+  getFallbackLocale = () => {
+    return this._registry.fallbackLocales;
   }
 
-  if (isSymbol(key)) {
-    key = key.substr(1);
+  setFallbackLocaleIntern = value => {
+    const previous = this._registry.fallbackLocales;
+    this._registry.fallbackLocales = [].concat(value || []);
+    return previous;
   }
 
-  key = this._registry.keyTransformer(key, options);
+  getAvailableLocale = () => this._registry.availableLocales || Object.keys(this._registry.translations);
 
-  options = extend(true, {}, options);
-
-  var locale = options.locale || this._registry.locale;
-  delete options.locale;
-
-  var scope = options.scope || this._registry.scope;
-  delete options.scope;
-
-  var separator = options.separator || this._registry.separator;
-  delete options.separator;
-
-  var fallbackLocales = [].concat(options.fallbackLocale || this._registry.fallbackLocales);
-  delete options.fallbackLocale;
-
-  var keys = this._normalizeKeys(locale, scope, key, separator);
-
-  var entry = getEntry(this._registry.translations, keys);
-
-  if (entry === null && options.fallback) {
-    this.emit('translationnotfound', locale, key, options.fallback, scope);
-    entry = this._fallback(locale, scope, key, options.fallback, options);
+  setAvailableLocales = value => {
+    const previous = this.getAvailableLocales();
+    this._registry.availableLocales = value;
+    return previous;
   }
 
-  if (entry === null && fallbackLocales.length > 0 && fallbackLocales.indexOf(locale) === -1) {
-    for (var ix in fallbackLocales) {
-      var fallbackLocale = fallbackLocales[ix];
-      var fallbackKeys = this._normalizeKeys(fallbackLocale, scope, key, separator);
-      entry = getEntry(this._registry.translations, fallbackKeys);
+  getSeparator = () => this._registry.separator;
 
-      if (entry) {
-        locale = fallbackLocale;
-        break;
+  setSeparatorIntern = value => {
+    const previous = this._registry.separator;
+    this._registry.separator = value;
+    return previous;
+  }
+
+  setInterpolate = value => {
+    const previous = this._registry.interpolate;
+    this._registry.interpolate = value;
+    return previous;
+  }
+
+  getInterpolate = () => this._registry.interpolate;
+
+  setKeyTransformerIntern = value => {
+    const previous = this._registry.keyTransformer;
+    this._registry.keyTransformer = value;
+    return previous;
+  }
+
+  getKeyTransformer = () => this._registry.keyTransformer;
+
+  registerTranslationsIntern = (locale, data) => {
+    const translations = {};
+    translations[locale] = data;
+    extend(true, this._registry.translations, translations);
+    return translations;
+  }
+
+  registerInterpolationsIntern = data => extend(true, this._registry.interpolations, data);
+
+  translateIntern = (key, options) => {
+    if (!isArray(key) && !isString(key) || !key.length) {
+      throw new Error('invalid argument: key');
+    }
+
+    if (isSymbol(key)) {
+      key = key.substr(1);
+    }
+
+    key = this._registry.keyTransformer(key, options);
+
+    options = extend(true, {}, options);
+
+    let locale = options.locale || this._registry.locale;
+    delete options.locale;
+
+    const scope = options.scope || this._registry.scope;
+    delete options.scope;
+
+    const separator = options.separator || this._registry.separator;
+    delete options.separator;
+
+    const fallbackLocales = [].concat(options.fallbackLocale || this._registry.fallbackLocales);
+    delete options.fallbackLocale;
+
+    const keys = this._normalizeKeys(locale, scope, key, separator);
+
+    let entry = getEntry(this._registry.translations, keys);
+
+    if (entry === null && options.fallback) {
+      this.emit('translationnotfound', locale, key, options.fallback, scope);
+      entry = this._fallback(locale, scope, key, options.fallback, options);
+    }
+
+    if (entry === null && fallbackLocales.length > 0 && !fallbackLocales.includes(locale)) {
+      for (const ix in fallbackLocales) {
+        const fallbackLocale = fallbackLocales[ix];
+        const fallbackKeys = this._normalizeKeys(fallbackLocale, scope, key, separator);
+        entry = getEntry(this._registry.translations, fallbackKeys);
+
+        if (entry) {
+          locale = fallbackLocale;
+          break;
+        }
       }
     }
-  }
 
-  if (entry === null) {
-    entry = 'missing translation: ' + keys.join(separator);
-  }
+    if (entry === null) {
+      entry = keys[1];
+      console.log('counterpart missing translation: ' + keys.join(separator));
+    }
 
-  entry = this._pluralize(locale, entry, options.count);
+    entry = this._pluralize(locale, entry, options.count);
 
-  if (this._registry.interpolate !== false && options.interpolate !== false) {
-    entry = this._interpolate(entry, options);
-  }
+    if (this._registry.interpolate !== false && options.interpolate !== false) {
+      entry = this._interpolate(entry, options);
+    }
 
-  return entry;
-};
-
-Counterpart.prototype.localize = function(object, options) {
-  if (!isDate(object)) {
-    throw new Error('invalid argument: object must be a date');
-  }
-
-  options = extend(true, {}, options);
-
-  var locale  = options.locale  || this._registry.locale;
-  var scope   = options.scope   || translationScope;
-  var type    = options.type    || 'datetime';
-  var format  = options.format  || 'default';
-
-  options = { locale: locale, scope: scope, interpolate: false };
-  format  = this.translate(['formats', type, format], extend(true, {}, options));
-
-  return strftime(object, format, this.translate('names', options));
-};
-
-Counterpart.prototype._pluralize = function(locale, entry, count) {
-  if (typeof entry !== 'object' || entry === null || typeof count !== 'number') {
     return entry;
   }
 
-  var pluralizeFunc = this.translate('pluralize', { locale: locale, scope: translationScope });
+  localizeIntern = (object, options) => {
+    if (!isDate(object)) {
+      throw new Error('invalid argument: object must be a date');
+    }
 
-  if (Object.prototype.toString.call(pluralizeFunc) !== '[object Function]') {
-    return pluralizeFunc;
+    options = extend(true, {}, options);
+
+    const locale  = options.locale  || this._registry.locale;
+    const scope   = options.scope   || translationScope;
+    const type    = options.type    || 'datetime';
+    let format  = options.format  || 'default';
+
+    options = { locale, scope, interpolate: false };
+    format  = this.translateIntern(['formats', type, format], extend(true, {}, options));
+
+    return strftime(object, format, this.translateIntern('names', options));
   }
 
-  return pluralizeFunc(entry, count);
-};
+  _pluralize = (locale, entry, count) => {
+    if (typeof entry !== 'object' || entry === null || typeof count !== 'number') {
+      return entry;
+    }
 
-Counterpart.prototype.withLocale = function(locale, callback, context) {
-  var previous = this._registry.locale;
-  this._registry.locale = locale;
-  var result = callback.call(context);
-  this._registry.locale = previous;
-  return result;
-};
+    const pluralizeFunc = this.translateIntern('pluralize', { locale, scope: translationScope });
 
-Counterpart.prototype.withScope = function(scope, callback, context) {
-  var previous = this._registry.scope;
-  this._registry.scope = scope;
-  var result = callback.call(context);
-  this._registry.scope = previous;
-  return result;
-};
+    if (Object.prototype.toString.call(pluralizeFunc) !== '[object Function]') {
+      return pluralizeFunc;
+    }
 
-Counterpart.prototype.withSeparator = function(separator, callback, context) {
-  var previous = this.setSeparator(separator);
-  var result = callback.call(context);
-  this.setSeparator(previous);
-  return result;
-};
+    return pluralizeFunc(entry, count);
+  }
 
-Counterpart.prototype._normalizeKeys = function(locale, scope, key, separator) {
-  var keys = [];
+  withLocaleIntern = (locale, callback, context) => {
+    const previous = this._registry.locale;
+    this._registry.locale = locale;
+    const result = callback.call(context);
+    this._registry.locale = previous;
+    return result;
+  }
 
-  keys = keys.concat(this._normalizeKey(locale, separator));
-  keys = keys.concat(this._normalizeKey(scope, separator));
-  keys = keys.concat(this._normalizeKey(key, separator));
+  withScope = (scope, callback, context) => {
+    const previous = this._registry.scope;
+    this._registry.scope = scope;
+    const result = callback.call(context);
+    this._registry.scope = previous;
+    return result;
+  }
 
-  return keys;
-};
+  withSeparator = (separator, callback, context) => {
+    const previous = this.setSeparatorIntern(separator);
+    const result = callback.call(context);
+    this.setSeparatorIntern(previous);
+    return result;
+  }
 
-Counterpart.prototype._normalizeKey = function(key, separator) {
-  this._registry.normalizedKeys[separator] = this._registry.normalizedKeys[separator] || {};
+  _normalizeKeys = (locale, scope, key, separator) => {
+    let keys = [];
 
-  this._registry.normalizedKeys[separator][key] = this._registry.normalizedKeys[separator][key] || (function(key) {
-    if (isArray(key)) {
-      var normalizedKeyArray = key.map(function(k) { return this._normalizeKey(k, separator); }.bind(this));
+    keys = keys.concat(this._normalizeKey(locale, separator));
+    keys = keys.concat(this._normalizeKey(scope, separator));
+    keys = keys.concat(this._normalizeKey(key, separator));
 
-      return [].concat.apply([], normalizedKeyArray);
-    } else {
-      if (typeof key === 'undefined' || key === null) {
-        return [];
+    return keys;
+  }
+
+  _normalizeKey = (key, separator) => {
+    this._registry.normalizedKeys[separator] = this._registry.normalizedKeys[separator] || {};
+
+    this._registry.normalizedKeys[separator][key] = this._registry.normalizedKeys[separator][key] || ((key => {
+      if (isArray(key)) {
+        const normalizedKeyArray = key.map(k => this._normalizeKey(k, separator));
+
+        return [].concat(...normalizedKeyArray);
+      } else {
+        if (typeof key === 'undefined' || key === null) {
+          return [];
+        }
+
+        const keys = key.split(separator);
+
+        for (let i = keys.length - 1; i >= 0; i--) {
+          if (keys[i] === '') {
+            keys.splice(i, 1);
+
+            if (this._registry.keepTrailingDot === true && i == keys.length) {
+              keys[keys.length - 1] += `${separator}`;
+            }
+          }
+        }
+
+        return keys;
+      }
+    }))(key);
+
+    return this._registry.normalizedKeys[separator][key];
+  }
+
+  _interpolate = (entry, values) => {
+  	if (typeof entry !== 'string') {
+  		return entry;
+  	}
+  	let ret = "";
+  	try {
+		ret = sprintf(entry, extend({}, this._registry.interpolations, values));  		
+  	} catch(e) {
+  		console.log("counterpart: error. Malformatted string '" + entry + "'!");
+  		ret = entry;
+  	}
+  	return ret;
+  }
+
+  _resolve = (locale, scope, object, subject, options={}) => {
+    if (options.resolve === false) {
+      return subject;
+    }
+
+    let result;
+
+    if (isSymbol(subject)) {
+      result = this.translateIntern(subject, extend({}, options, { locale, scope }));
+    } else if (isFunction(subject)) {
+      let dateOrTime;
+
+      if (options.object) {
+        dateOrTime = options.object;
+        delete options.object;
+      } else {
+        dateOrTime = object;
       }
 
-      var keys = key.split(separator);
+      result = this._resolve(locale, scope, object, subject(dateOrTime, options));
+    } else {
+      result = subject;
+    }
 
-      for (var i = keys.length - 1; i >= 0; i--) {
-        if (keys[i] === '') {
-          keys.splice(i, 1);
+    return /^missing translation:/.test(result) ? null : result;
+  }
 
-          if (this._registry.keepTrailingDot === true && i == keys.length) {
-            keys[keys.length - 1] += '' + separator;
-          }
+  _fallback = (locale, scope, object, subject, options) => {
+    options = except(options, 'fallback');
+
+    if (isArray(subject)) {
+      for (let i = 0, ii = subject.length; i < ii; i++) {
+        const result = this._resolve(locale, scope, object, subject[i], options);
+
+        if (result) {
+          return result;
         }
       }
 
-      return keys;
-    }
-  }.bind(this))(key);
-
-  return this._registry.normalizedKeys[separator][key];
-};
-
-Counterpart.prototype._interpolate = function(entry, values) {
-  if (typeof entry !== 'string') {
-    return entry;
-  }
-
-  return sprintf(entry, extend({}, this._registry.interpolations, values));
-};
-
-Counterpart.prototype._resolve = function(locale, scope, object, subject, options) {
-  options = options || {};
-
-  if (options.resolve === false) {
-    return subject;
-  }
-
-  var result;
-
-  if (isSymbol(subject)) {
-    result = this.translate(subject, extend({}, options, { locale: locale, scope: scope }));
-  } else if (isFunction(subject)) {
-    var dateOrTime;
-
-    if (options.object) {
-      dateOrTime = options.object;
-      delete options.object;
+      return null;
     } else {
-      dateOrTime = object;
+      return this._resolve(locale, scope, object, subject, options);
     }
-
-    result = this._resolve(locale, scope, object, subject(dateOrTime, options));
-  } else {
-    result = subject;
   }
-
-  return /^missing translation:/.test(result) ? null : result;
-};
-
-Counterpart.prototype._fallback = function(locale, scope, object, subject, options) {
-  options = except(options, 'fallback');
-
-  if (isArray(subject)) {
-    for (var i = 0, ii = subject.length; i < ii; i++) {
-      var result = this._resolve(locale, scope, object, subject[i], options);
-
-      if (result) {
-        return result;
-      }
-    }
-
-    return null;
-  } else {
-    return this._resolve(locale, scope, object, subject, options);
-  }
-};
-
-var instance = new Counterpart();
-
-function translate() {
-  return instance.translate.apply(instance, arguments);
 }
+
+const instance = new Counterpart();
+
+Counterpart.prototype.onLocaleChange =
+Counterpart.prototype.addLocaleChangeListener = callback => {
+                                                  events.EventEmitter.addListener('localechange', callback);
+                                                };
+
+Counterpart.prototype.offLocaleChange =
+Counterpart.prototype.removeLocaleChangeListener = callback => {
+                                                      events.EventEmitter.removeListener('localechange', callback);
+                                                    };
+
+Counterpart.prototype.onTranslationNotFound =
+Counterpart.prototype.addTranslationNotFoundListener = callback => {
+                                                          events.EventEmitter.addListener('translationnotfound', callback);
+                                                        };
+
+Counterpart.prototype.offTranslationNotFound =
+Counterpart.prototype.removeTranslationNotFoundListener = callback => {
+                                                            events.EventEmitter.removeListener('translationnotfound', callback);
+                                                          };
+const registerTranslations = (locale, data) => instance.registerTranslationsIntern(locale, data);
+const translate = (key, options) => instance.translateIntern(key, options);
+const setLocale = value => instance.setLocaleIntern(value);
+const setFallbackLocale  = value => instance.setFallbackLocaleIntern(value);
+const setSeparator = value => instance.setSeparatorIntern(value);
+const getLocale = () => instance.getLocaleIntern();
+const withLocale = (locale, callback, context) => instance.withLocaleIntern(locale, callback, context);
+const registerInterpolations = () => instance.registerInterpolationsIntern();
+const setKeyTransformer = () => instance.setKeyTransformerIntern();
+const localize = () => instance.localizeIntern();
 
 extend(translate, instance, {
   Instance: Counterpart,
   Translator: Counterpart
 });
 
-module.exports = translate;
+export default translate
+const counterpart = Counterpart;
+export {counterpart, translate, registerTranslations, setLocale, setFallbackLocale, setSeparator, getLocale, withLocale, registerInterpolations, setKeyTransformer, localize}
