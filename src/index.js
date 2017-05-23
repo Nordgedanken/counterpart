@@ -39,8 +39,8 @@ class Counterpart extends events.EventEmitter {
             keyTransformer(key) { return key; },
             generateMissingEntry(key) { return 'missing translation: ' + key; },
         };
-        this.registerTranslationsIntern('en', require('../locales/en'));
-        this.setMaxListeners(0);
+        // this.registerTranslationsIntern('en', require('../locales/en'));
+        // this.setMaxListeners(0);
 
     getLocaleIntern = () => this._registry.locale;
 
