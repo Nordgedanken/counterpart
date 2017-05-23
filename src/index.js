@@ -25,7 +25,7 @@ const getEntry = (translations, keys) => keys.reduce((result, key) => isPlainObj
 
 class Counterpart extends events.EventEmitter {
     constructor() {
-    super();
+        super();
         this._registry = {
             locale: 'en',
             interpolate: true,
@@ -39,12 +39,11 @@ class Counterpart extends events.EventEmitter {
             keyTransformer(key) { return key; },
             generateMissingEntry(key) { return 'missing translation: ' + key; },
         };
-        // this.registerTranslationsIntern('en', require('../locales/en'));
-        // this.setMaxListeners(0);
-
-    getLocaleIntern = () => {
-        return this._registry.locale;
+        this.registerTranslationsIntern('en', require('../locales/en'));
+        this.setMaxListeners(0);
     }
+
+    getLocaleIntern = () => this._registry.locale;
 
     setLocaleIntern = value => {
         const previous = this._registry.locale;
@@ -57,9 +56,7 @@ class Counterpart extends events.EventEmitter {
         return previous;
     }
 
-    getFallbackLocale = () => {
-        return this._registry.fallbackLocales;
-    }
+    getFallbackLocale = () => this._registry.fallbackLocales;
 
     setFallbackLocaleIntern = value => {
         const previous = this._registry.fallbackLocales;
@@ -67,9 +64,7 @@ class Counterpart extends events.EventEmitter {
         return previous;
     }
 
-    getAvailableLocale = () => {
-        return this._registry.availableLocales || Object.keys(this._registry.translations);
-    }
+    getAvailableLocale = () => this._registry.availableLocales || Object.keys(this._registry.translations);
 
     setAvailableLocales = value => {
         const previous = this.getAvailableLocales();
@@ -77,9 +72,7 @@ class Counterpart extends events.EventEmitter {
         return previous;
     }
 
-    getSeparator = () => {
-        return this._registry.separator;
-    }
+    getSeparator = () => this._registry.separator;
 
     setSeparatorIntern = value => {
         const previous = this._registry.separator;
@@ -93,9 +86,7 @@ class Counterpart extends events.EventEmitter {
         return previous;
     }
 
-    getInterpolate = () => {
-        return this._registry.interpolate;
-    }
+    getInterpolate = () => this._registry.interpolate;
 
     setKeyTransformerIntern = value => {
         const previous = this._registry.keyTransformer;
@@ -103,9 +94,7 @@ class Counterpart extends events.EventEmitter {
         return previous;
     }
 
-    getKeyTransformer = () => {
-        this._registry.keyTransformer;
-    }
+    getKeyTransformer = () => this._registry.keyTransformer;
 
     registerTranslationsIntern = (locale, data) => {
         const translations = {};
@@ -339,10 +328,7 @@ class Counterpart extends events.EventEmitter {
         return previous;
     }
   
-    getMissingEntryGeneratorIntern = () => {
-        return this._registry.generateMissingEntry;
-    }
-  }
+    getMissingEntryGeneratorIntern = () => this._registry.generateMissingEntry;
 }
 
 const instance = new Counterpart();
