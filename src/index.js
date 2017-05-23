@@ -257,15 +257,25 @@ class Counterpart extends events.EventEmitter {
                         }
                     }
                 }
-
                 return keys;
             }
         }))(key);
-
         return this._registry.normalizedKeys[separator][key];
     }
 
-    _interpolate = (entry, values) => (typeof entry !== 'string') ? entry : sprintf(entry, extend({}, this._registry.interpolations, values));
+    _interpolate = (entry, values) => {
+        if (typeof entry !== 'string') {
+            return entry;
+        }
+        let ret = "";
+        try {
+            ret = sprintf(entry, extend({}, this._registry.interpolations, values));        
+        } catch(e) {
+            console.log("counterpart: error. Malformatted string '" + entry + "'!");
+            ret = entry;
+        }
+        return ret;
+    }
 
     _resolve = (locale, scope, object, subject, options = {}) => {
         if (options.resolve === false) {
