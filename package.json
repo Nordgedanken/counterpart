@@ -1,6 +1,6 @@
 {
     "name": "counterpart",
-    "version": "0.17.8",
+    "version": "0.18.0",
     "description": "A translation and localization library for Node.js and the browser - forked with ES6 support",
     "main": "lib/index.js",
     "repository": {
