@@ -329,7 +329,7 @@ class Counterpart extends events.EventEmitter {
         return previous;
     }
   
-    getMissingEntryGenerator = () => this._registry.generateMissingEntry;
+    getMissingEntryGeneratorIntern = () => this._registry.generateMissingEntry;
   }
 }
 
