@@ -35,6 +35,7 @@ class Counterpart extends events.EventEmitter {
       separator: '|',
       keepTrailingDot: false,
       keyTransformer(key) { return key; },
+      generateMissingEntry(key) { return 'missing translation: ' + key; },
     };
 
     this.registerTranslationsIntern('en', require('../locales/en'));
@@ -134,9 +135,11 @@ class Counterpart extends events.EventEmitter {
 
     let entry = getEntry(this._registry.translations, keys);
 
-    if (entry === null && options.fallback) {
+    if (entry === null) {
       this.emit('translationnotfound', locale, key, options.fallback, scope);
-      entry = this._fallback(locale, scope, key, options.fallback, options);
+      if (options.fallback) {
+        entry = this._fallback(locale, scope, key, options.fallback, options);
+      }
     }
 
     if (entry === null && fallbackLocales.length > 0 && !fallbackLocales.includes(locale)) {
@@ -154,6 +157,7 @@ class Counterpart extends events.EventEmitter {
 
     if (entry === null) {
       entry = keys[1];
+      entry = this._registry.generateMissingEntry(keys.join(separator));
       console.log('counterpart missing translation: ' + keys.join(separator));
     }
 
@@ -321,6 +325,14 @@ class Counterpart extends events.EventEmitter {
       return this._resolve(locale, scope, object, subject, options);
     }
   }
+  
+  setMissingEntryGeneratorIntern = value => {
+    var previous = this._registry.generateMissingEntry;
+    this._registry.generateMissingEntry = value;
+    return previous;
+  }
+  
+  getMissingEntryGenerator = () => this._registry.generateMissingEntry;
 }
 
 const instance = new Counterpart();
@@ -354,6 +366,8 @@ const withLocale = (locale, callback, context) => instance.withLocaleIntern(loca
 const registerInterpolations = () => instance.registerInterpolationsIntern();
 const setKeyTransformer = () => instance.setKeyTransformerIntern();
 const localize = () => instance.localizeIntern();
+const setMissingEntryGenerator = () => instance.setMissingEntryGeneratorIntern();
+const getMissingEntryGenerator = () => instance.getMissingEntryGeneratorIntern();
 
 extend(translate, instance, {
   Instance: Counterpart,
@@ -362,4 +376,4 @@ extend(translate, instance, {
 
 export default translate
 const counterpart = Counterpart;
-export {counterpart, translate, registerTranslations, setLocale, setFallbackLocale, setSeparator, getLocale, withLocale, registerInterpolations, setKeyTransformer, localize}
+export {counterpart, translate, registerTranslations, setLocale, setFallbackLocale, setSeparator, getLocale, withLocale, registerInterpolations, setKeyTransformer, localize, setMissingEntryGenerator, getMissingEntryGenerator}
