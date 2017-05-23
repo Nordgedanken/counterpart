@@ -24,6 +24,7 @@ const hasOwnProp = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
 const getEntry = (translations, keys) => keys.reduce((result, key) => isPlainObject(result) && hasOwnProp(result, key) ? result[key] : null, translations);
 
 class Counterpart extends events.EventEmitter {
+<<<<<<< HEAD
     constructor() {
         super();
         this._registry = {
@@ -42,6 +43,23 @@ class Counterpart extends events.EventEmitter {
         this.registerTranslationsIntern('en', require('../locales/en'));
         this.setMaxListeners(0);
     }
+=======
+  constructor() {
+    super();
+    this._registry = {
+      locale: 'en',
+      interpolate: true,
+      fallbackLocales: [],
+      scope: null,
+      translations: {},
+      interpolations: {},
+      normalizedKeys: {},
+      separator: '|',
+      keepTrailingDot: false,
+      keyTransformer(key) { return key; },
+      generateMissingEntry(key) { return 'missing translation: ' + key; },
+    };
+>>>>>>> 1b15e2987501ddf7a0838974f0de134fdc0f4073
 
     getLocaleIntern = () => this._registry.locale;
 
@@ -141,11 +159,20 @@ class Counterpart extends events.EventEmitter {
             entry = this._fallback(locale, scope, key, options.fallback, options);
         }
 
+<<<<<<< HEAD
         if (entry === null && fallbackLocales.length > 0 && !fallbackLocales.includes(locale)) {
             for (const ix in fallbackLocales) {
                 const fallbackLocale = fallbackLocales[ix];
                 const fallbackKeys = this._normalizeKeys(fallbackLocale, scope, key, separator);
                 entry = getEntry(this._registry.translations, fallbackKeys);
+=======
+    if (entry === null) {
+      this.emit('translationnotfound', locale, key, options.fallback, scope);
+      if (options.fallback) {
+        entry = this._fallback(locale, scope, key, options.fallback, options);
+      }
+    }
+>>>>>>> 1b15e2987501ddf7a0838974f0de134fdc0f4073
 
                 if (entry) {
                     locale = fallbackLocale;
@@ -159,7 +186,15 @@ class Counterpart extends events.EventEmitter {
             console.log('counterpart missing translation: ' + keys.join(separator));
         }
 
+<<<<<<< HEAD
         entry = this._pluralize(locale, entry, options.count);
+=======
+    if (entry === null) {
+      entry = keys[1];
+      entry = this._registry.generateMissingEntry(keys.join(separator));
+      console.log('counterpart missing translation: ' + keys.join(separator));
+    }
+>>>>>>> 1b15e2987501ddf7a0838974f0de134fdc0f4073
 
         if (this._registry.interpolate !== false && options.interpolate !== false) {
             entry = this._interpolate(entry, options);
@@ -321,6 +356,14 @@ class Counterpart extends events.EventEmitter {
             return this._resolve(locale, scope, object, subject, options);
         }
     }
+    setMissingEntryGeneratorIntern = value => {
+        var previous = this._registry.generateMissingEntry;
+        this._registry.generateMissingEntry = value;
+        return previous;
+    }
+  
+    getMissingEntryGenerator = () => this._registry.generateMissingEntry;
+  }
 }
 
 const instance = new Counterpart();
@@ -354,6 +397,8 @@ const withLocale = (locale, callback, context) => instance.withLocaleIntern(loca
 const registerInterpolations = () => instance.registerInterpolationsIntern();
 const setKeyTransformer = () => instance.setKeyTransformerIntern();
 const localize = () => instance.localizeIntern();
+const setMissingEntryGenerator = () => instance.setMissingEntryGeneratorIntern();
+const getMissingEntryGenerator = () => instance.getMissingEntryGeneratorIntern();
 
 extend(translate, instance, {
     Instance: Counterpart,
@@ -362,4 +407,8 @@ extend(translate, instance, {
 
 export default translate
 const counterpart = Counterpart;
+<<<<<<< HEAD
 export { counterpart, translate, registerTranslations, setLocale, setFallbackLocale, setSeparator, getLocale, withLocale, registerInterpolations, setKeyTransformer, localize }
+=======
+export {counterpart, translate, registerTranslations, setLocale, setFallbackLocale, setSeparator, getLocale, withLocale, registerInterpolations, setKeyTransformer, localize, setMissingEntryGenerator, getMissingEntryGenerator}
+>>>>>>> 1b15e2987501ddf7a0838974f0de134fdc0f4073
