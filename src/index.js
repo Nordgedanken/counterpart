@@ -42,7 +42,9 @@ class Counterpart extends events.EventEmitter {
         // this.registerTranslationsIntern('en', require('../locales/en'));
         // this.setMaxListeners(0);
 
-    getLocaleIntern = () => this._registry.locale;
+    getLocaleIntern = () => {
+        return this._registry.locale;
+    }
 
     setLocaleIntern = value => {
         const previous = this._registry.locale;
@@ -65,7 +67,9 @@ class Counterpart extends events.EventEmitter {
         return previous;
     }
 
-    getAvailableLocale = () => this._registry.availableLocales || Object.keys(this._registry.translations);
+    getAvailableLocale = () => {
+        return this._registry.availableLocales || Object.keys(this._registry.translations);
+    }
 
     setAvailableLocales = value => {
         const previous = this.getAvailableLocales();
@@ -73,7 +77,9 @@ class Counterpart extends events.EventEmitter {
         return previous;
     }
 
-    getSeparator = () => this._registry.separator;
+    getSeparator = () => {
+        return this._registry.separator;
+    }
 
     setSeparatorIntern = value => {
         const previous = this._registry.separator;
@@ -87,7 +93,9 @@ class Counterpart extends events.EventEmitter {
         return previous;
     }
 
-    getInterpolate = () => this._registry.interpolate;
+    getInterpolate = () => {
+        return this._registry.interpolate;
+    }
 
     setKeyTransformerIntern = value => {
         const previous = this._registry.keyTransformer;
@@ -95,7 +103,9 @@ class Counterpart extends events.EventEmitter {
         return previous;
     }
 
-    getKeyTransformer = () => this._registry.keyTransformer;
+    getKeyTransformer = () => {
+        this._registry.keyTransformer;
+    }
 
     registerTranslationsIntern = (locale, data) => {
         const translations = {};
@@ -329,7 +339,9 @@ class Counterpart extends events.EventEmitter {
         return previous;
     }
   
-    getMissingEntryGeneratorIntern = () => this._registry.generateMissingEntry;
+    getMissingEntryGeneratorIntern = () => {
+        return this._registry.generateMissingEntry;
+    }
   }
 }
 
