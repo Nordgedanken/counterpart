@@ -1,5 +1,3 @@
-'use strict';
-
 import extend from 'extend';
 import { isArray } from 'util';
 import { isDate } from 'util';
@@ -25,7 +23,7 @@ const getEntry = (translations, keys) => keys.reduce((result, key) => isPlainObj
 
 class Counterpart extends events.EventEmitter {
     constructor() {
-    super();
+        super();
         this._registry = {
             locale: 'en',
             interpolate: true,
@@ -41,6 +39,7 @@ class Counterpart extends events.EventEmitter {
         };
         this.registerTranslationsIntern('en', require('../locales/en'));
         this.setMaxListeners(0);
+    }
 
     getLocaleIntern = () => this._registry.locale;
 
@@ -55,9 +54,7 @@ class Counterpart extends events.EventEmitter {
         return previous;
     }
 
-    getFallbackLocale = () => {
-        return this._registry.fallbackLocales;
-    }
+    getFallbackLocale = () => this._registry.fallbackLocales;
 
     setFallbackLocaleIntern = value => {
         const previous = this._registry.fallbackLocales;
@@ -330,7 +327,6 @@ class Counterpart extends events.EventEmitter {
     }
   
     getMissingEntryGeneratorIntern = () => this._registry.generateMissingEntry;
-  }
 }
 
 const instance = new Counterpart();
