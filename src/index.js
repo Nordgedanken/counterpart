@@ -1,5 +1,3 @@
-'use strict';
-
 import extend from 'extend';
 import { isArray } from 'util';
 import { isDate } from 'util';

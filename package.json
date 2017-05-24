@@ -1,6 +1,6 @@
 {
     "name": "counterpart-riot",
-    "version": "0.18.3",
+    "version": "0.18.4",
     "description": "A translation and localization library for Node.js and the browser - forked with ES6 support",
     "main": "lib/index.js",
     "repository": {
